@@ -1,0 +1,4 @@
+fog-norain	1315.57980681
+fog-rain	1115.13151799
+nofog-norain	1078.54679697
+nofog-rain	1098.95330076
