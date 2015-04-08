@@ -8,7 +8,7 @@ and looking for references or to the instructors looking for their students work
 then I would suggest looking into Udacity's program. If you're interested in using any of the code, you are forewarned that 
 this code was created within the context of learning and understanding and may not be suitable for production. Furthermore skeleton files were provided by Udacity and come attached with their use license (Creative Commons Attribution-NonCommercial-NoDerivs 3.0 License). 
 
-To view the projects please navigate to the relevent files; ipython notebooks filenames will include project number for reference. For each project there exists short-questions-and-answer notebooks, whose filenames are also labeled for project number reference.  
+To view the projects please navigate to the relevent directory; ipython notebooks filenames will include project number for reference. For some of the projects there also exists related short-question-and-answer ipy. notebooks, whose filenames will also include project number references.  
 
 ##Requirements  
 Suggest Continuum Analytics Anaconda python distribution ([http://continuum.io/downloads](http://continuum.io/downloads)) 
