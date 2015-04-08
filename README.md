@@ -21,5 +21,5 @@ up the notebook to automatically download any missing packages therefore if you 
 Installation instructions for Anaconda's python distribution can be found here: [http://docs.continuum.io/anaconda/install.html]
 (http://docs.continuum.io/anaconda/install.html)
 
-*(work in progress... will add to as I progress further into course)    
+*(work in progress... will continue to expand upon)    
 *(To do: add a 'getting started', add 'credit and reference information' links Udacity courses, add license info, add contact info)
