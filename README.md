@@ -1,4 +1,4 @@
-# My Udacity Data Analyst Nano-Degree Projects
+##Udacity Data Analyst Nano-Degree Projects
 ####*Repository for Udacity Data Analyst Nano-Degree Projects*  
 
 **Purpose** :   
