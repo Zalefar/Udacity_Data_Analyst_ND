@@ -16,7 +16,9 @@ modules used within.
 up the notebook to automatically download any missing packages therefore if you are missing any of the required modules I suggest that you use Anaconda's `conda` binary package manager to install and update any of the necessary modules. e.g In a terminal `conda install {ggplot}` {insert relevent package here sans the braces} or `conda update {ggplot}`
 
 Installation instructions for Anaconda's python distribution can be found here: [http://docs.continuum.io/anaconda/install.html]
-(http://docs.continuum.io/anaconda/install.html)
+(http://docs.continuum.io/anaconda/install.html)   
+
+For any R code found in html or markdown files you might wish to implement it on your own machine I would suggest RStudio ([http://www.rstudio.com/products/rstudio/download/](http://www.rstudio.com/products/rstudio/download/)) 
 
 *(work in progress... will continue to expand upon)    
 *(To do: add a 'getting started', add 'credit and reference information' links Udacity courses, add license info, add contact info)
