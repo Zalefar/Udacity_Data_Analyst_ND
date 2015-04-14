@@ -3,9 +3,9 @@
 
 **Purpose** :   
 This GitHub repository was created as a portfolio into which I intend to place my projects from Udacity's Nano-Degree program. 
-If your goal is to learn the material yourself then I would suggest looking into Udacity's program. If you're interested in using any of the code, you are forewarned that this code was created within the context of learning and understanding and may not be suitable for production. Furthermore skeleton files were provided by Udacity and come attached with their use license (Creative Commons Attribution-NonCommercial-NoDerivs 3.0 License). 
+If your goal is to learn the material yourself then I would suggest looking into Udacity's program. If you're interested in using any of the code, you are forewarned that this code was created within the context of learning and understanding and may not be suitable for production. Furthermore skeleton code and data files were provided by Udacity and come attached with their use license (Creative Commons Attribution-NonCommercial-NoDerivs 3.0 License). 
 
-To view the projects please navigate to the relevent directory; project filenames will include project number for reference.
+To view the projects please navigate to the relevent directory; project filenames will include project number for reference. Final versions of projects have been converted to html document format. 
 
 ##Requirements  
 Suggest Continuum Analytics Anaconda python distribution ([http://continuum.io/downloads](http://continuum.io/downloads)) 
