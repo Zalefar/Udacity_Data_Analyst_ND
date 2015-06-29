@@ -1,0 +1,37 @@
+<style>
+	h1 {	 
+		color: #FF3300;
+		font-family: "Georgia",serif;
+		font-style: bold;
+		font-size: 6em;
+		text-shadow: .125em .125em #CCCAD2;
+		letter-spacing: .1875em;
+	}
+
+	h2 { 
+		color: #00063E;
+		font-family: "Times New Roman", Times, Sans-serif;
+		font-style: bold;
+		font-size: 4em;
+		text-shadow: .0625em .0625em #CCCAD2;
+	}
+
+	h3 {
+		color: #00063E;
+		font-family: "Times New Roman", Times, Sans-serif;
+		font-style: bold, italic;
+		font-size: 2em;
+		letter-spacing: .125em;
+	}
+	h4 {
+		color: #000115;
+		font-family: "Times New Roman", Times, Sans-serif;
+		font-size: 3em;
+	}
+	p { 
+		text-indent: 3em;
+		font-size: 1.25em;
+		font-family:"Times New Roman", Times, Sans-serif;
+	}
+</stlye>
+
