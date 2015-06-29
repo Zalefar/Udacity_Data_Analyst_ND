@@ -1,0 +1,1 @@
+> The OSM data files used in this project are not included in this repository owing to their size exceeding 100MBs. As if you wish to implement the code in the ipython noteboks you will have to follow the provided links in the notebook and download the dataset into the same directory as the notebooks. 
