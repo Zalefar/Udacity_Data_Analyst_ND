@@ -1,0 +1,2189 @@
+---
+title: "Live long and Prosper!"
+author: "Zach Farmer"
+output:
+  html_document:
+    fig_height: 8
+    fig_width: 12
+    toc: yes
+---
+#Abstract      
+*Prosper is a peer-to-peer online lending marketplace, a silicon-valley endeavor to disrupt the current industry of personal loans provided by institutions. Prosper is the first company to provide an online marketplace for everyday investors to offer loans to everyday borrowers. Institutions (e.g. banks, credit unions, etc.) have traditionally been the avenue of loans as a means of mitigating the costs and distributing the risk involved in lending capital. In the following analysis I utilize anonymized data of Prospers users to explore borrowers 'creditworthiness' in order to describe the investors 'risk' and 'reward' for Prosper loans. I would like to explore the efficacy of Prosper's borrower metrics to determine whether or not they provide viable means for individuals to invest their money in strangers with reasonable confidence in the outcome. If it can be shown that through Prosper's lending marketplace investors and borrowers can connect in a mutually beneficial manner for the large majority of transactions this potentially describes a path to disrupting the traditional marketplace.*
+
+*****************   
+
+#Introduction      
+
+For those who have attempted to borrow money before and more importantly for those lending money (specifically to strangers) there is an important piece of information necessary for the transaction to proceed, assuming you wish to be paid back. The 'creditworthiness' of the borrower, this key ingredient to the business of loaning capital has over time and place known various forms. The current iteration, at least here in the United States, has resolved itself into the credit score. A number which strives to embody an individuals 'creditworthiness', which is an attempt to make quantifiable and subsequently discount-able the risk involved in providing money to another as a loan.  Given that the credit score is such an important metric for quantifying the risk involved in lending money to a stranger, let's briefly explore in general terms how these scores are currently arrived at. 
+*A creditor usually looks at three factors known as the "three Cs": capacity, capital, and character.*            
+
+* *Capacity. The present and future ability to meet your financial obligations. Some of the areas examined would be your work history and the amount of debt that you already owe.*              
+* *Capital. Savings and other assets that could be used as collateral for loans. Even if you are not required to post collateral, many creditors express a preference that you have assets other than income that could be used to repay a loan.*               
+* *Character. This boils down to trustworthiness, promptness in paying your existing bills and other debts, and your credit history.*    
+
+**Source** *[How lenders Rate Credit Worthiness](https://www.calcxml.com/do/article?id=751719129&cat=credit)*        
+
+Traditionally credit bureaus, also known as credit reporting agencies collect various information related to the three "C's" above. Information related to an individual's borrowing habits, their bill-paying habits (on-time, late, consistency of either) and previous loans. It can be shown that knowledge of this information can prove a valid indicator of future loan outcomes. All the information collected by credit reporting agencies is designed to reduce the "effect of asymmetric information between borrowers and lenders, to alleviate problems of adverse selection and moral hazard"([wikipedia](https://en.wikipedia.org/wiki/Credit_bureau#United_States)). In other words by reviewing the fiscal habits of someone we have never met we can assess with some measure of accuracy the risk involved in lending that person money. The real question is how much accuracy and in the interest of determining the viability of Prospers business plan, is it enough for potential investors to put their money on the line? 
+
+Typically credit bureaus collect personal information related to an individuals credit worthiness by sourcing it from data furnishers, e.g. creditors, lenders, utilities, collection agencies, and courts. This information is then made available to those performing risk assessment through a credit background search. The Prosper data, anonymized but made available through an API provides us with an opportunity to explore the some of the data behind the 'science' of quantifying borrowers 'creditworthiness'.    
+
+To begin I installed several packages and set the R-libraries required for the rest of this analysis. I then review the whole data-set, simplify, combine, and reduced many of the variables before venturing into the actual plotting and analysis. After finishing the preparation of the data I subdivide it into different groups to represent a 'range' of prosper users. Next I proceed to graph the remaining variables in uni-variate plots faceted on my groups. I review those graphs after which I narrow down my analysis to just a few key variables I hope to use to capture the essence of my question. Then I move to plotting my multi-variate charts and follow up with descriptions of the outcomes and my general thoughts on how the data reviewed thus far relates to and describes my goal. Next a create a simply and fast supervised classification model to predict whether a loan will be successful or not, and briefly review which variables contributed the most to this model. I  finish with an overall summary of my analysis and end with some reflections and conclusions on the analysis.  
+
+*********            
+
+##Dataset Preparation     
+```{r echo=FALSE}
+setwd("/Users/Zach/Desktop/Udacity_DataAnalyst_ND/Project_3/EDA_Project/")
+```
+
+###Packages for Analysis          
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+# Load all of the packages that I end up using
+# in my analysis.
+
+## The following packages were neccessary for my analysis, 
+## Uncomment to load for the fist time, if neccesary.
+#install.packages("rmarkdown")
+#install.packages("maps")
+#install.packages("mapdata")
+#install.packages("tidyr")
+#install.packages("mosaic")
+#install.packages("dunn.test")
+#install.packages("polycor")
+#install.packages("hexbin")
+#install.packages("randomForest")
+#install.packages("caret")
+
+## I found the following libraries helpful in my analysis
+library(ggplot2) # for plotting
+library(GGally) # for upgraded pairs function
+library(scales)
+library(gridExtra) # for plotting multiple plots 
+library(maps) # for the choropleth map
+library(mapdata) # for the choropleth map
+library(dplyr) # for upgraded dataframe manipulation
+library(tidyr) # for upgraded dataframe manipulation
+library(mosaic) 
+library(FSA) # for dunn.test (non-parametric test of similarity)
+library(RColorBrewer) # for ploting color scales
+library(polycor) # for the hetcor correlation analysis
+require(grid) # for ploting 
+library(caret) # for partioning dataframe into training and test set
+library(randomForest) # for constructing supervised classfication model to
+# measure importance of features
+
+```
+
+###Dataset - Loan data from Prosper      
+
+The data used for this exploratory analysis was collected from the peer-to-peer online lending platform Prosper. This data is provided to the public through both a RESTful API and as a large snapshot download in csv or XML file format. Recently Prosper has changed its public access to the snapshot data dump, and will only release snapshot data for 45 days after the close of each quarter. [https://www.prosper.com/tools/DataExport.aspx](https://www.prosper.com/tools/DataExport.aspx)       
+
+```{r, echo = TRUE}
+## Load the Prosper data from the local directory
+ProsperData_full <- read.csv("prosperLoanData.csv", header=TRUE)
+```
+           
+###Dataset Description  
+
+The snapshot data set used here was last updated 03/11/2014, it contains 113,937 loan listings with over 81 variables on each loan listing. Further details on all of the variables can be found [here](https://docs.google.com/document/d/1qEcwltBMlRYZT-l699-71TzInWfk4W9q5rTCSvDVMpc/pub?embedded=true). In brief summary the data contains a large collection of variables associated with borrowers requesting loans, for example, data on borrowers credit, income, intended use, previous and current lines of credit and prior Prosper loans. Additionally Prosper's proprietary variables are provided with the purpose of attempting to measure risk and profitability of potential loanees, not unlike a credit score.        
+          
+###Preparation            
+```{r, echo=FALSE}
+## Initial first look at the data.
+cat(paste("First look at the structure of the data-set","\n",
+          "Number of observations: ",dim(ProsperData_full)[1],"\n",
+          "Number of features: ", dim(ProsperData_full)[2], sep=''))
+
+str(ProsperData_full)
+```
+
+For several of these variables the reporting methods changed after 2009 (specific variables can be found by reading the variable descriptions but are generally related to Prosper's proprietary variables), I filtered out all loans originating before 2009-01-01. Dates and times have been converted to a cleaner and easier format to work with using strptime. 
+```{r, echo=TRUE, comment=NA}
+# Convert ListingCreationDate using strptime, then filter by equality 
+# operator, > 2009 (109,posixt format)
+filteredPost09 <- function(ProsperData_full) {
+#
+#   input: Prosper dataframe containing all listings.
+#
+#   output: Prosper dataframe containing only those listings dated 
+#        on or after 2009.
+#
+    # convert dates using strptime
+    ProsperData_full$ListingCreationDate = strptime(
+        ProsperData_full$ListingCreationDate,"%Y-%m-%d")
+
+    # Subset by dates on or after 2009
+    ProsperData_Post_09 = subset(ProsperData_full, 
+                    ProsperData_full$ListingCreationDate$year >= 109)
+
+    ProsperData_Post_09$ListingCreationDate = as.Date(
+        ProsperData_Post_09$ListingCreationDate, "%Y-%m-%d")
+    
+    return(ProsperData_Post_09)
+}
+
+ProsperData_Post_09 <- filteredPost09(ProsperData_full)
+
+cat(paste("Number of loan listings: ",dim(ProsperData_Post_09)[1], sep=''))
+```
+
+Looking over the variables I decided that for this analysis the remaining POSIXlt date times did not add value at their current level of detail that I was interested in exploring. I therefore converted them to [ISO 8601](http://www.cl.cam.ac.uk/~mgk25/iso-time.html) compliant dates for the year-month-day only. 
+```{r, echo=TRUE}
+## Convert to Date all POSIXlt where time detail is not necessary. Use as.
+# Date on columns; FirstRecordedCreditLine, DateCreditPulled, 
+# LoanOriginationDate
+convertDates <- function(ProsperData_Post_09) {
+#
+#   Input: Prosper dataframe containing only those listings dated 
+#        on or after 2009
+# 
+#   output: Prosper dataframe where all Date and Times have been converted
+#       into year-month-day format.
+#    
+    ProsperData_Post_09$FirstRecordedCreditLine <- as.Date(
+        strptime(ProsperData_Post_09$FirstRecordedCreditLine, "%Y-%m-%d"))
+    
+    ProsperData_Post_09$DateCreditPulled <- as.Date(
+        strptime(ProsperData_Post_09$DateCreditPulled, "%Y-%m-%d"))
+    
+    ProsperData_Post_09$LoanOriginationDate <- as.Date(
+        strptime(ProsperData_Post_09$LoanOriginationDate, "%Y-%m-%d"))
+
+    return(ProsperData_Post_09)
+}
+
+ProsperData_Post_09 = convertDates(ProsperData_Post_09)
+```
+
+In an effort to focus attention on a reduced number of variables I removed those variables which I felt did not provide analytical value that I was interested in or seemed redundant or were summarized in other features. I also removed the unique key values for the members, the loans themselves, and the groups, preferring instead to use  the loan listing key as my 'primary key'. 
+```{r, echo=TRUE, comment=NA}
+## Drop the following variables; 
+# -ListingNumber (use ListingKey instead), 
+# -BorrowerRate (this value is incorporated in the BorrowerAPR,
+# which I believe is more representative of acutal costs),
+# -LenderYield (This value is incorporated in the EstimatedReturn),
+# -EstimatedEffectiveYield (This value is incorporated in the Estimated
+# Return), 
+# -EstimatedLoss (This value is incorporated in the EstimatedReturn),
+# -ProsperRating..Alpha. (This value is duplicated in the 
+# ProsperRating..Numeric.), 
+# -ProsperScore (This value is used to determine the Prosper Rating,
+# therefore its information is captured in that variable)
+# -Occupation (Far to many categories to effectivly graph without 
+# attempting to aggregate into broader disciplines which is made 
+# difficult by ambiguity of user inputs.), 
+# -EmploymentStatus (This variable is caputured in the 
+# EmploymentStatusDuration and Annual Income), 
+# -OpenRevolvingAccounts (I will use OpenrevolvingMonthlyPayments as 
+# proxy to represent the explanation value of this variable), 
+# -TotalInquiries (More focused on inquiries for the last 6 months not a
+# persons lifetime), 
+# -PublicRecordsLast10Years (Again more focused in the Public 
+# Records more recent than that of 10 years), 
+# -TotalCreditLinespast7years (A quick and dirty overiew of this data
+# suggests a standard piosson distr. Given the large number of variables
+# I will drop this variable and simply rely on current credit lines to
+# capture whatever information existed in this variable)
+# -OpenCreditLines (I will rely on a combination of current credit lines
+# and information of credit load, monthly credit payments, and debt ratio
+# to explain the important essence of this variable.)
+# -AvailableBankcardCredit (This information can be derived from 
+# BankcardUtilization (1-BankcardUtil.)),
+# -RevolvingCreditBalance (Given the large number of variables I will 
+# place emphasis on the percentage of available credit used rather than
+# then the total amount. I will drop this variable and use 
+# BankcardUtilization only)
+# -TotalTrades (More interested in the trade lines open in last 6 
+# months rather then the lifetime of borrower.)
+# -ScorexChangeAtTimeOfListing (For the sake of reducing the number
+# variables I will drop this variable, This is interesting but will be
+# sacrificed in pursuit of narrowing my focus), 
+# -LoanFirstDefaultedCycleNumber (Information is already captured by the
+# loan Status variable the only other value is in finding patterns in how
+# long before defaulted. This is not a direction I wish to take in this
+# analysis),
+# -LoanOriginationDate (I believe that most important value this variable
+# adds is in determining the age of the loan and LoanMonthsSinceOrigination
+# already captures this, unless of course we are interested in any lurking
+# effects associated with the loan origination date.),
+# -LoanOriginationQuarter (Any trends gleened from this would be suspect
+# for lurking variables associated with context of the timeframe, again this is not a direction I wish to take 
+# with this analysis),
+# -MemberKey (Already have unique listing key I will forego this key),
+# -ClosedDate (This information is available in less detail in the
+# LoanStatus. The additional value it adds such as the average length of
+# failed loans is interesting but again not a direction I wish to take in
+# this analysis),
+# -LoanMonthsSinceOrigination (Current Age of the loans is not a variable
+# I will consider when reviewing risk and rewards of prospser loans, this
+# variable I believe be more valuable in a longitudinal study with other
+# variables.)
+# -LoanKey (I already have unique listing key I will forego this key),
+# -LoanNumber (Already have unique listing key I will forego this key),
+# -LP_CustomerPayments (This variable is made of LP_CustomerPrincipalPayments 
+# and LP_InterestandFees, I intend to analysis just the interest or value
+# gained from the loan. Therefore I will be dropping this variable.)
+# -CurrentlyInGroup (Not really sure what value this adds, so I will avoid it.)
+# -GroupKey (not interested in Groups),
+# -PercentFunded (Not sure if this is just a symptom of when the data was
+# collected or represents borrowers who are difficult to fund. Given that
+# over 99% of loans are fully funded I will drop this variable)
+ProsperData_Post_09_Subset <- subset(ProsperData_Post_09, 
+        select = -c(ListingNumber, BorrowerRate, LenderYield, 
+        EstimatedEffectiveYield, EstimatedLoss, ProsperRating..Alpha.,
+        ProsperScore, Occupation, EmploymentStatus, OpenRevolvingAccounts,
+        TotalInquiries, PublicRecordsLast10Years, AvailableBankcardCredit,
+        TotalTrades, ScorexChangeAtTimeOfListing, ClosedDate, 
+        LoanFirstDefaultedCycleNumber, LoanOriginationDate, 
+        LoanOriginationQuarter, MemberKey, LoanKey, CreditGrade, 
+        LoanNumber, LP_CustomerPayments, CurrentlyInGroup, GroupKey,
+        PercentFunded, TotalCreditLinespast7years, OpenCreditLines,
+        LoanMonthsSinceOrigination) )
+
+cat(paste("Number of features (variables): ",
+          dim(ProsperData_Post_09_Subset)[2],sep=''))
+```
+
+```{r, echo=FALSE}
+## Note: Method for adjusting figure display size in html knitr
+#fig.width,fig.height,out.width,out.height = device and output size of figures
+```
+
+After looking at the remaining data I checked all the variables for values that were '0' or 'NA'. Reviewing the results I removed a few variables on the bases that most of their values were 'NA's' or '0's ( well over 90%).
+```{r, echo=TRUE, fig.width = 10, fig.height = 8}
+## Review number of zero entries as a ratio for each variable
+zerosRatio <- function(ProsperData_Post_09_Subset, plot=TRUE,
+                       listValues = FALSE) {
+#    
+#   Input: Prosper Data frame, 'plot' variable (TRUE | FALSE) to toggle plot 
+#    on/off (default == TRUE), 'listValue' variable (TRUE | FALSE) to toggle 
+#    on/off list of variables with their respective percent zero values 
+#    (default == FALSE)
+#    
+#   Ouput: Barplot of percent zero ratios for all variables in dataframe,
+#   optional list display of those variables with text representations of
+#   their percent zero ratios
+#    
+    # Count the number of non-zero values in each column
+    non_zero <- colSums(ProsperData_Post_09_Subset != 0.0, na.rm = TRUE)
+
+    percent_zero <- ((dim(ProsperData_Post_09_Subset)[1]-non_zero)/
+                         dim(ProsperData_Post_09_Subset)[1]) *100
+    
+    df = data.frame(percent_zero) 
+
+    variables = row.names(df)
+    percent_zero = df$percent_zero
+    # for ease of sorting and graphing, created dataframe with 'variables'
+    # as a column and not row names.
+    df =  data.frame(variables, percent_zero)
+
+    # rearrange rows, sorting by percent_zero ratio values
+    df_sorted = arrange(df, desc(percent_zero))
+    
+    if (listValues == TRUE ) 
+        {
+        print (df_sorted)
+        }
+    else {
+        print ("sorting variables based on ratio of zero values")
+        }
+        
+
+# order the variables to match the percent_zero order for plotting
+    df_sorted$variables <- reorder(df_sorted$variables,
+                                   df_sorted$percent_zero)
+    if (plot == TRUE) {
+    # Note: plot x-axis is a little crowded 
+    ggplot(data = df_sorted, aes(x=variables, y = percent_zero)) +
+        scale_y_continuous(breaks = seq(0,100,10), 
+                           labels = function(x){return(paste(x,"%",sep=''))}) +
+        geom_bar(stat='identity', colour=('white'), fill=('red')) +
+        ylab("Percent of zero values present in variable") + 
+        xlab("Variables") + 
+        theme(axis.text.x=element_text(angle = 75, hjust = 1))
+    }
+    else {
+        print ("Plot disabled")
+    }
+}
+
+zerosRatio(ProsperData_Post_09_Subset)
+```
+
+After running a quick analysis on the number of zero values for each of the variables (features) a few variables jumped out. These variables contain mostly zero values (above 90%) and may have value to potential Prosper investors if only to highlight what you are unlikely to find in borrowers. The following variables had very high percentages of no data:       
+
+* ProsperPaymentsOneMonthPlusLate -- 99.6% zero values;                 
+* InvestmentFromFriendsCount -- 99.3% zero values;             
+* InvestmentFromFriendsAmount -- 99.3% zero values;               
+* PublicRecordsLast12Months -- 99.2% zero values; This variable is the number of public records within the last 12 months.                
+* LP_NonPrincipalRecoverypayments -- 98.91% zero values; The interest and fee component of any recovery payments            
+* Recommendations -- 98.57% zero values;         
+* ProsperPaymentsLessThanOneMonthLate -- 95.9% zero values;                  
+* LP_CollectionFees -- 95.23% zero values; Cumulative collection fees paid by the investors who have invested in the loan.           
+* LP_NetPrincinpleLoss -- 92.72% zero values; The principle that remains uncollected after any recoveries.             
+* LP_GrossPrincipleLoss -- 92.65% zero values; The gross charged off     (written off loss, unrecoverable) amount of the loan.          
+* LoanCurrentDaysDelinquent -- 90.1% zero values;        
+  
+With the exception of the social variables (recommendations, investment from friends and investment from friends amount) the data and lack thereof suggests that not many prosper loans are defaulted on (again this is just a snapshot, cross-sectional look at data for one quarter, I am working on the assumption that it holds some predictive value for the average Prosper quarter). For the most part it appears as if the methods employed by Prosper to represent 'creditworthiness' allow lenders to make mostly valid assessments of a borrowers risk.     
+
+There are still far to many variables at this point for brevity and so little information is reported on the more socially focused variables I will not incorporate them in the rest of the analysis. It would be very interesting if these variables contained more data, suggesting that traditional lending paradigms could be adjusted to incorporate a social element in the risk analysis.   
+```{r, echo=TRUE, comment=NA}
+## Drop PublicRecordsLast12Months, Recommendations,
+# InvestmentFromFriendsCount, InvestmentFromFriendsAmount
+ProsperData_Post_09_Subset = subset(ProsperData_Post_09_Subset,
+        select = -c(PublicRecordsLast12Months,Recommendations, 
+                    InvestmentFromFriendsCount, InvestmentFromFriendsAmount))
+
+cat(paste("Number of loan listings: ",dim(ProsperData_Post_09_Subset)[1]
+          ,"\n","Number of features (variables): ",
+          dim(ProsperData_Post_09_Subset)[2], sep=''))
+```
+
+I will generate several broad groups of loan listings which I will examine together with the other remaining variables. These groups are as follows; current loans, successful loans and unsuccessful loans. That is those loans which are completed or on their final payment vs. those loans that have been cancelled, charged-off or have been defaulted on. Lastly I will look at loans that are currently past due. I'll subdivide these groups by first time Prosper users and prior Prosper users to see if any valuable information can be gleaned by looking at borrowers who were able to get another loan from Prosper lenders. The key motivation behind the groups is to shrink down the factor variable of loan status so that visual analysis will be cleaner with 4 levels rather then 12 levels that currently exist in the Loan Status variable. As a result I will lose information on the past due loans which are currently broken down into different lengths of lateness and on the different methods of loan failure. In the later mulivariate analysis I will separate out the current loans and past due loans and look at just those loans that have completed or failed as a ground truth representation of the patterns and trends in successful or failed loan listings. 
+
+```{r, echo=TRUE}
+## Create variables describing Prosper Users: Prosper_User_Status, Loan_Outcome
+generateGroups <- function(ProsperDataFrame){
+#    
+#   Input: Proser DataFrame
+#
+#   Output: A prosper Data Frame with two new variables; 
+#    Prosper_User_Status and Loan Outcome. 
+#    Prosper Users Status: First Time Borrowers, Previous Borrowers.
+#    Loan Outcomes: Current, Successful, Past Due, Unsuccessful
+#
+   
+   ProsperDataFrame = mutate(ProsperDataFrame, 
+                Prosper_User_Status = ifelse(!is.na(TotalProsperLoans),
+                "Previous Prosper User","First Time Prosper User"))
+
+    ProsperDataFrame = mutate(ProsperDataFrame, 
+        Loan_Outcome = ifelse((LoanStatus == "Chargedoff" | 
+            LoanStatus == "Cancelled" | LoanStatus == "Defaulted"),
+            "Unsuccessful Loan", ifelse((LoanStatus == "Completed" |
+            LoanStatus == "FinalPaymentInProgress"),"Successful Loan",
+            ifelse(LoanStatus == "Current", "Current Loan",
+                   "Past Due Loan")))) #LoanStatus == "Current" 
+
+    return(ProsperDataFrame)
+}
+
+ProsperData_Post_09_Subset = generateGroups(ProsperData_Post_09_Subset)
+```
+***              
+
+#Analysis     
+```{r, echo=TRUE}
+## Create several new variables, rename several old variables,
+# refactor incorrectly imported variables, convert difftime to
+# numeric for ease of use and finally drop variables used for combining
+# into new variables that will no longer be apart of the analysis.
+
+mutateData <- function(ProsperDataSet) {
+#    
+#   Input: Prosper datasets containing a subset of Prosper variables   
+#
+#   Output: A dataframe of Prosper data containing several new variables; 
+#   'credit_range','payment_to_monthly_income','credit_history_years
+#   ', and "lender_return". These variables will be created by 
+#   transmuting and/or removing the following variables;
+#   CreditScoreRangeLower, CreditScoreRangeUpper, StatedMonthlyIncome,
+#   MonthlyLoanPayment,LP_InterestandFees,LP_NonPrincipalRecoverypayments
+#   FirstRecordedCreditLine, DateCreditPulled, LP_CollectionFess,
+#   LP_ServiceFees, LP_NetPrinciple Loss, LP_NonPrincipleRecoveryPayments.
+#    
+#    Rename variables where prudent and finally convert following integer
+#    variables to Factors; ProsperRating and ListingCategory.
+#   
+
+    ## Combine credit lower and upper into a
+# credit range and convert to factor. Convert date credit pulled and first
+# recorded credit into a variable representing a borrowers credit history
+# in years. Use monthly loan payment and monthy income to create a variable
+# representing the portion of a borrowers income going towards loan
+# payments. Finally using a combination of all the Interest fees collected
+# by lenders minus all the loss principle, cost of collection fees and loan
+# servicing fees (if any exist), to create a variable representing the
+# return positive or negative on a lenders investment.
+    df_mutate = ProsperDataSet %>%
+        mutate(credit_range = as.factor(
+            paste(CreditScoreRangeLower  ,CreditScoreRangeUpper, sep="-")),
+            credit_history_years = round((
+                DateCreditPulled-FirstRecordedCreditLine)/365,0),
+            payment_to_monthly_income = ifelse(StatedMonthlyIncome != 0,
+                round((MonthlyLoanPayment / (StatedMonthlyIncome)),2), 1.01),
+            lender_return = round((((LP_InterestandFees + 
+                LP_NonPrincipalRecoverypayments) + 
+                (LP_CollectionFees+LP_ServiceFees-LP_NetPrincipalLoss)) /
+                LoanOriginalAmount), 6)) 
+    
+    # convert difftime to numeric (easier variable to work with)
+    df_mutate$credit_history_years = as.numeric(
+                    df_mutate$credit_history_years)
+   
+    ## created to explore my lender_return variable and double check its
+# results to make sure they are reasonable 
+    df_furtherStudy <<- df_mutate
+    
+    # Drop those variables no longer neccessary for calculations
+    df_drop = subset(df_mutate, select = -c(CreditScoreRangeLower,
+    CreditScoreRangeUpper, DelinquenciesLast7Years, StatedMonthlyIncome,
+    DateCreditPulled, FirstRecordedCreditLine, LP_CollectionFees,
+    LP_ServiceFees, OnTimeProsperPayments, LP_NetPrincipalLoss,
+    LP_GrossPrincipalLoss, LP_NonPrincipalRecoverypayments,
+    LP_CustomerPrincipalPayments,LP_InterestandFees,LoanStatus) )
+    
+    # Rename variables containing uneccessary information
+    df_rename = rename(df_drop, 
+            ListingDate = ListingCreationDate,
+            ProsperRating = ProsperRating..numeric. ,
+            ListingCategory = ListingCategory..numeric.,
+            EmploymentDurationMonths = EmploymentStatusDuration)
+    
+    
+    # Convert ProsperRating, ListingCategory,Prosper_User_Status and
+# Loan_Outcomes to factors
+    df_rename$ProsperRating = as.factor(df_rename$ProsperRating )
+    df_rename$ListingCategory = as.factor(df_rename$ListingCategory)
+    df_rename$Prosper_User_Status = as.factor(df_rename$Prosper_User_Status)
+    df_rename$Loan_Outcome = as.factor(df_rename$Loan_Outcome)   
+    
+    return(df_rename)
+}
+
+Prosper_Post09_Subset <- mutateData(ProsperData_Post_09_Subset)
+```
+
+```{r echo = TRUE, results='hide'}
+## Breifly explore my lender return variable to double check that it was constructed correctly and makes logical sense. 
+
+temp_df = (df_furtherStudy[,c("LoanOriginalAmount","LP_InterestandFees",
+        "LP_ServiceFees","LP_CollectionFees","LP_NetPrincipalLoss",
+        "LP_NonPrincipalRecoverypayments")])
+
+df_sums = (df_furtherStudy$LP_InterestandFees + 
+        df_furtherStudy$LP_NonPrincipalRecoverypayments) + 
+        (df_furtherStudy$LP_ServiceFees + 
+        df_furtherStudy$LP_CollectionFees - 
+        df_furtherStudy$LP_NetPrincipalLoss)
+
+by(data = df_furtherStudy,c(df_furtherStudy$Loan_Outcome),
+   function(x) summary(((x$LP_InterestandFees + 
+        x$LP_NonPrincipalRecoverypayments) + 
+        (x$LP_ServiceFees+x$LP_CollectionFees - 
+        x$LP_NetPrincipalLoss))/
+        x$LoanOriginalAmount))
+
+temp_df1 <- df_furtherStudy %>% 
+                filter(Prosper_User_Status == "Previous Prosper User",
+                       Loan_Outcome == "Successful Loan")
+
+temp_df1 <- mutate(temp_df1, sign = lender_return >= 0.0)
+```
+
+##Part 1 - Univariate plots    
+
+Utilizing ggplot I graph most of the variables remaining at this point. I will facet on my groups, technically this is introducing another variable so it is not truly uni-variate. By faceting I hope to highlight the variables containing interesting explanatory power as they relate to my groups. I will not continue exploring all of the variables past this point in my analysis so I wish to briefly explore their relevancy to my groups and ultimately how they may influence a borrowers 'creditworthiness'. 
+
+I apply a pair-wise Mann Whitney U test (sometimes I use a Dunn test (Kruskal-Wallis multiple comparisons)) to each of my variables to analytically determine significant differences between my groups. I use a non-parametric test to make as few assumptions as possible about the distributions. The use of the analytical tests is to back up my assessments of the graphs several of whose distributions look very similar across my facets. In addition I was looking to add some statistical rigor to my assessments. I generate a couple of ad-hoc functions to perform graph specific transformations and alteration in order to make more sensible graphs for several of the variables.  
+
+```{r}
+## Reorder or re-level factor variables for more sensible graph labeling
+# referenced: http://www.cookbook-r.com/Manipulating_data/Changing_the_order_of_levels_of_a_factor/
+# -- Changing the order of levels of a factor
+reorderFactorVariables <- function(DataFrame) {
+#
+#   Input: Prosper DataFrame
+#
+#   Output: Prosper DataFrame whose factor variables have been reorder or 
+#   properly leveled for more logical plots.
+#
+    DataFrame$IncomeRange <- factor(DataFrame$IncomeRange, 
+            levels=c("Not Employed", "$0","$1-24,999","$25,000-49,999",
+                     "$50,000-74,999","$75,000-99,999","$100,000+"))
+    
+    DataFrame$Loan_Outcome <- factor(DataFrame$Loan_Outcome,
+            levels = c("Current Loan","Successful Loan", "Past Due Loan",
+                       "Unsuccessful Loan"))
+    
+    return(DataFrame)
+}
+
+Prosper_Post09_Subset = reorderFactorVariables(Prosper_Post09_Subset)
+```
+
+```{r echo = FALSE}
+#View(Prosper_Post09_Subset)
+```
+
+```{r echo =FALSE, comment=NA}
+# Final review of the DataFrame
+cat(paste("Final review of data-set structure ","\n","Number of loan listings: ",
+    dim(Prosper_Post09_Subset)[1],"\n","Number of features: ",
+    dim(Prosper_Post09_Subset)[2],sep=''))
+```
+
+```{r echo=FALSE}
+str(Prosper_Post09_Subset)
+```
+
+***********
+
+###Plots   
+**Univariate Plot Functions **     
+The following plots are a first brush look at the remaining variables to highlight any interesting trends in the variables, if they exist, as they relate to my facet groups and goal. 
+
+**Helper Functions**          
+```{r }
+## Function to return a sample subset of dataframe for faster computation and 
+## interation times in the initial construction of graphs. Will not use for 
+## final plots and analysis
+sampleDataFrame <- function(DataFrame, samplesize) {
+#
+#   Input: DataFrame, samplesize
+#
+#   Output: DataFrame containing a sample of rows equal to the provided
+#   samplesize in the parameter
+#
+    return(sample_n(DataFrame, size = samplesize))
+
+}
+
+## Convert DataFrame's BorrowState abbrv. to full name for choropleth map
+stateMapPrep <- function(DataFrame) {
+#
+#   Input: Prosper DataFrame
+#
+#   Output: New subsetted Prosper DataFrame with 'State' (Borrower State 
+#   variables have been coverted from abbreviation to full state names)
+#   and 'Freq' the cummulative count of each state as they occured in the  
+#   full data set. 
+#   
+    # transmute each abbreviation of BorrowState to full name
+    DataFrame$BorrowerState = tolower(state.name[match(
+        DataFrame$BorrowerState, state.abb)])
+    
+    # using unique and table create new dataframe contaning the states and
+# their respective counts in the input DataFrame
+    DataFrame_StateFreq = data.frame(with(DataFrame,
+                        prop.table(table(BorrowerState))))
+ 
+    DataFrame_final = rename(DataFrame_StateFreq, state = BorrowerState)
+    
+    return(DataFrame_final[!is.na(DataFrame_final$state),])
+}
+
+## Plot a map of the united states where color represents frequency of Borrowers
+
+## References used explicity for the choropleth map are to be found here;
+# http://blog.revolutionanalytics.com/2009/10/geographic-maps-in-r.html,
+#https://uchicagoconsulting.wordpress.com/tag/r-ggplot2-maps-visualization/,
+# https://trinkerrstuff.wordpress.com/2013/07/05/ggplot2-chloropleth-of-supreme-court-decisions-an-tutorial/ 
+#https://trinkerrstuff.wordpress.com/2013/07/05/ggplot2-chloropleth-of-supreme-court-decisions-an-tutorial/
+
+choropleth_map <- function(ProsperDataFrame){
+#
+#   Input: Prosper Data Frame containing a variable with state abbreviations
+#
+#   Output: choropleth map based on the number of those state abbreviations 
+#   seen in the dataframe.
+#
+
+    # using maps packages pull state data; longitude and latitude
+    states_map <- map_data("state")
+    states = data.frame(state.name)
+
+    # rename states variables for merging
+    states <- select(states, state = state.name)
+    # apply map preperation function and use shorthand name to reference it
+    map_df <- stateMapPrep(ProsperDataFrame)
+
+    # Merge data set so that all states are represented 
+    map_ready_df <- merge(states, map_df, by="state", all=TRUE)
+    # Replace NA's for states without any borrowers with zeros values.
+    map_ready_df[is.na(map_ready_df)] <- 0
+
+    plot_state <- ggplot(map_ready_df, aes(map_id = state) ) +
+        geom_map(aes(fill = Freq), map = states_map, colour = "Black") +
+        expand_limits(x = states_map$long, y = states_map$lat) +
+        scale_fill_gradient(low="white", high="red") +
+        theme(legend.position = "bottom",
+            axis.ticks = element_blank(), 
+            axis.title = element_blank(), 
+            axis.text =  element_blank()) +
+        guides(fill = guide_colorbar(barwidth = 9, barheight = .7)) + 
+        ggtitle("Choropleth map of Loan Listings by Locations")
+
+    return(plot_state)
+}
+
+## Found the following function which I used to plot my sqrt transformation
+# to achieve more visually valuable breaks in my charts here: 
+# https://groups.google.com/forum/#!topic/ggplot2/IUje5H0jwm4. credit
+# goes to Brian S. Diggs, PhD 
+#Senior Research Associate, Department of Surgery 
+#Oregon Health & Science University
+
+mysqrt_trans <- function() { 
+   trans_new("mysqrt", 
+             transform = base::sqrt, 
+             inverse = function(x) ifelse(x<0, 0, x^2), 
+             domain = c(0, Inf)) 
+} 
+```
+
+```{r echo = FALSE, comment=NA}
+## Plot state map
+print("Borrower Residences by State")
+choropleth_map(Prosper_Post09_Subset) 
+```
+
+*The choropleth map (of borrower frequency) appears to fall victim to the yet another population map syndrome. There could be more to this map then just a representation of population demographics but for future analysis I will no longer explore the state location of loan listings.*       
+
+*******     
+```{r echo = F, comment=NA}
+## Loan Term Duration ##
+univariateTermPlot <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x = Term, ..density..)) +
+    geom_bar(width = 15, fill = "orange",alpha=.8,colour = "black") +
+    coord_cartesian(xlim = c(0,75)) +
+    scale_x_discrete(breaks = c(12,36,60)) +
+    theme_bw() + 
+    theme(plot.title = element_text(size = rel(1)),
+          panel.grid.major.y=element_blank()) +
+    xlab("length of loan term in months") +
+    ggtitle("Distribution of Loan Durations") +
+    coord_flip() + 
+    facet_grid(Loan_Outcome ~ Prosper_User_Status,margin=TRUE)
+    return(plot)
+}
+print("Loan Term Duration")
+univariateTermPlot(Prosper_Post09_Subset)
+```
+
+*Plot suggests differences between my groups in loan term durations. There appears to be fewer past due payments on 12 month loans ( for both new and returing borrowers). There is an increased number of past due loanees with 60 month loans. The overall trend for Prosper loans is 36 months, although it does appear that previous Prosper borrowers are more likely to apply for 12 month loans. As the most popular loan length is 36 months it is not to suprising that most successful loans are 36 months and most unsuccessful loan are also 36 months. Interestingly there are smaller proportions of current borrowers requesting 12 month loans.*        
+
+*******       
+```{r echo = FALSE, comment=NA, fig.height=6,fig.width=8}
+univariateListingDate <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x=ListingDate, ..density..) ) +
+        geom_histogram(aes(fill = ..count..),colour="grey", binwidth = 20) + 
+        xlab("date the loan was first listed") +
+        ylab("number of loans") +
+        theme(plot.title = element_text(size = rel(1))) +
+        guides(fill = guide_colorbar(barwidth = .9) ) +
+        ggtitle("Loan Listings by Year") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, scale = "free",margin=TRUE)
+           
+    return(plot)
+}
+print("Listing Date")
+univariateListingDate(Prosper_Post09_Subset)
+```
+
+*While it is clear that differences exist between my groups it is not clear that it is anything more then simply the result of time. Shifts in distribution make sense intuitively if we recall that my groups themselves are often time dependent. No doubt useful information exists here, but I am not prepared to explore whether the loan origination date is a vaild indicator of a borrowers 'creditworthiness'. Especially not with snapshot data, this information would be more interesting in a longitudinal study of Prosper loan listings.*    
+
+******
+```{r echo = FALSE, comment=NA}
+univariateBorrowerAPR <- function(ProsperDataFrame) {
+    plot <- ggplot(ProsperDataFrame, aes(x=BorrowerAPR,..density..)) +
+        geom_histogram(aes(fill = ..count..),colour ="white", binwidth = .01) +
+        coord_cartesian(xlim=c(0,quantile(ProsperDataFrame$BorrowerAPR,.99))) + 
+        scale_x_continuous(breaks = seq(
+            0,quantile(ProsperDataFrame$BorrowerAPR,.99),.05),
+            label=function(x){return(paste(x*100,"%"))}) +
+        xlab("borrowers annual precentage rate (APR)") +
+        guides(fill = guide_colorbar(barwidth = .9) )  +
+        theme(axis.text.x=element_text(angle = 75, hjust = 1),
+              plot.title = element_text(size = rel(1))) +
+        ggtitle("Borrowers APR Distributions") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status,margins=TRUE)
+    return(plot)
+}
+print("Borrower APR")
+univariateBorrowerAPR(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$BorrowerAPR,
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$BorrowerAPR,
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*Some interesting trends occurring here. On average previous borrowers are not subject to as high an APR rate, why is that?. It also appears that borrowers who are past due or unsuccessful in paying back there loans are subject to a higher interest on average. This might indicate that Prosper's method of measuring risk (and subsequently discounting it) contains some efficacy. It is interesting to note the number of borrowers with an APR as high as ~35% accross all groups. This really high percetage of ~35% for Borrowers APR applies only to first time borrowers. clearly we would expect riskier borrowers to pay higher interest rates but why the uneven distribution and heavy skew to one really high APR?*      
+
+*******     
+```{r echo = FALSE, comment=NA}
+univariateEstimatedReturn <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x=EstimatedReturn, ..density..)) +
+        geom_histogram(aes(fill = ..count..),colour ="white", binwidth = .005) +
+        scale_fill_gradient("Count",low="dark green", high="light green") +
+        scale_x_continuous(breaks = seq(0,.2,.01),
+                           label=function(x){return(paste(x*100,"%"))}) +
+        coord_cartesian(xlim = c(0,.2)) +
+        xlab("lenders estimated return rate") +
+        guides(fill = guide_colorbar(barwidth = .9) ) +
+        theme(axis.text.x=element_text(angle = 75, hjust = .9),
+              plot.title = element_text(size = rel(1))) +
+        ggtitle("Lender Estimated Return Rate Distributions") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margins=TRUE)
+    
+    return(plot)
+}
+print("Lenders Estimated Return Rate")
+univariateEstimatedReturn(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$EstimatedReturn,
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$EstimatedReturn,
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+
+*There is a trend to higher estimated returns associated with loanees past due or who have failed on their loans (i.e. higher risk). It is interesting to note that the very high borrower's APR of ~35% for a large percentage of borrowers is not reflected (at least not yet) with as much consistency here in lenders estimated return rates. Additionally it does appear that for previous borrowers there is a slight shift towards lower return rates accross all loan groups. Are previous borrower's estimated return rates more accurate given Prosper's prior knowledge of borrower's performance on previous Prosper loans?*   
+
+******
+```{r echo = FALSE, comment=NA}
+univariateProsperRating <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x=ProsperRating,
+                                         ..density..,group=1 )) + 
+        geom_bar(fill="grey", colour = "blue") +
+        scale_fill_brewer(palette = "RdYlGn",labels=
+                              c("HR","E","D","C","B","A","AA")) + 
+        xlab("rating (1-worst, 7-best)") +
+        theme_bw() + 
+        theme(plot.title = element_text(size = rel(1)),
+              panel.grid.major.x=element_blank()) + 
+        ggtitle("Prosper Rating (indicator of expected loss)") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status,margin=TRUE)
+    
+    return(plot)
+}
+print("Prosper Proprietary Rating (Numeric)")
+univariateProsperRating(Prosper_Post09_Subset)
+```
+
+*There is a clear trend in first time borrowers of lower ratings for past due and unsuccessful loans (again this is good news for Prosper's rating system). Additionally it appears that for successuful loans previous borrowers have higher ratings. With actual data on previous Prosper users' loan performance, Prosper's scoring system looks to be more accurate in ranking riskiness. This suggests that Prosper's rating system for returning user is a slighter better estimator then for first time users.*     
+
+***** 
+```{r echo = FALSE, comment=NA}
+univariateListingCategory <- function(ProsperDataFrame){
+    getPalette=colorRampPalette(brewer.pal(9,'Set1'))
+    
+    plot <- ggplot(subset(ProsperDataFrame, ListingCategory != 0),
+                   aes(x=ListingCategory)) + 
+        stat_bin(aes(y=..density..,group=1,fill = factor(..x..))) +
+        scale_fill_manual(name = 'categories', breaks = 1:20,
+            labels=c("DebtCons.","HomeImprov.","Business","Pers.Loan"
+            ,"StudentUse","Auto","Other","Baby&Adoption","Boat",
+            "CosmeticProced.","Engag.Ring", "GreenLoans",
+            "HouseExpenses","LargePurch.","Medical/Dental","Motorcycle",
+            "RV","Taxes","Vacation","WeddingLoans"),
+            values = getPalette(20)) +
+        guides(fill=guide_legend(ncol=1),
+               shape=guide_legend(override.aes=list(size=5))) +
+        scale_y_sqrt() +
+        xlab("Listing Category Numeric Codes") +
+        theme(axis.text.x=element_text(angle = 75, hjust = .9),
+              legend.key.size = unit(0.5,'cm'),
+              legend.text = element_text(size=rel(1)),
+              plot.title = element_text(size = rel(1)),
+              panel.grid.major.x=element_blank()) +
+        ggtitle("Listed Reasons for Loan") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margin=T)
+    
+    return(plot)    
+}
+print("Reasons for Loan")
+univariateListingCategory(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+dunnTest(x=as.numeric(Prosper_Post09_Subset$ListingCategory),
+         g=Prosper_Post09_Subset$Loan_Outcome,method="holm")
+
+```
+
+*There does appear to be significant differences between my loan outcomes. Overall it looks like most loans are requested for debt consolidation. Some of the clearest differences are actually between unsuccessful loans and successful loans. There are more unsuccessful loans proportionally for business, Green Loans, House Expenses and large purchases.*   
+
+*******  
+```{r echo = FALSE, comment=NA}
+univariateEmploymentDuration <- function(ProsperDataFrame){
+    plot<- ggplot(ProsperDataFrame, aes(x=EmploymentDurationMonths,
+                                        ..density..) ) +
+        geom_histogram(binwidth = 12, color = "white", fill = "red",
+                       alpha = .7) +
+        coord_cartesian(xlim = c(0,624)) +
+        scale_x_continuous(breaks = seq(0,624,24) ) +
+        xlab("Length of Employment in Months") +
+        theme(axis.text.x=element_text(angle = 75, hjust = .9),
+              plot.title = element_text(size = rel(1))) +
+        ggtitle("Distribution of Employment Duration") + 
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margin=TRUE)
+
+    return(plot)
+}
+print("Length of Employment")
+univariateEmploymentDuration(Prosper_Post09_Subset)
+```
+
+```{r echo =FALSE,comment=NA, warning=FALSE, message=FALSE}
+dunnTest(Prosper_Post09_Subset$EmploymentDurationMonths,
+    Prosper_Post09_Subset$Loan_Outcome, method='holm')
+
+pairwise.wilcox.test(Prosper_Post09_Subset$EmploymentDurationMonths,
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+
+```
+
+*After running an analytical test with error rate adjusted using "holm" method, there appears to be a statistically significant difference between the distributions of some of the loan outcomes and the prosper user statuses. Current Prosper borrowers have a longer work history on average then previous borrowers. The differences are not visually extreme but this variable may hold some explanatory power in understanding the attributes of 'creditworthiness' of borrowers.*      
+
+*******
+
+```{r echo = FALSE, comment=NA}
+univariateHomeowner <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x = IsBorrowerHomeowner,
+                                         y = ..density..,group=1) ) +
+        geom_bar(fill = "#E69F00", colour="white") + 
+        xlab("homeowner status") + 
+        theme(plot.title = element_text(size = rel(1)),
+              panel.grid.major.x=element_blank()) +
+        ggtitle("Distribution of Homeowner Status") + 
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, scale = "free") 
+    return(plot)
+}
+print("Is Borrower a Homeowner")
+univariateHomeowner(Prosper_Post09_Subset)
+```
+
+*Trend towards more homeowners with successful loans, one exception is previous Prosper borrowers who are past due. This variable has appears to have explanatory power as it relates to my groups and question.*
+
+******** 
+
+```{r echo=FALSE, comment=NA}
+univariateCurrentCreditLines <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x=CurrentCreditLines) ) + 
+        geom_density(aes(fill = Loan_Outcome), alpha = .6) +
+        coord_cartesian(xlim = c(
+            0,quantile(ProsperDataFrame$CurrentCreditLines,.99)+2 )) +
+        scale_x_continuous(breaks = seq(
+            0,quantile(ProsperDataFrame$CurrentCreditLines,.99),2)) + 
+        xlab("number of current credit lines") +
+        theme(plot.title = element_text(size = rel(1)),
+              axis.text.x=element_text(angle = 75, hjust = .9)) +
+        ggtitle("Distribution of Credit Lines") + 
+        facet_grid(~Prosper_User_Status, scale = "free", margin = TRUE)
+    
+    return(plot)
+}
+print("Number of Credit Lines")
+univariateCurrentCreditLines(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$CurrentCreditLines,
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.methods = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$CurrentCreditLines, 
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.methods = "holm")
+```
+
+*For first time borrowers, riskier(unsuccessful or past due) loanees tend to have less credit lines on average. This feature has a statistically significant difference and likely different distributions but it is seen in this graph as a small difference. The difference between first time and previous borrowers is interesting, suggesting slightly more homogeny in previous borrowers credit line distribution between loan outcomes.*  
+
+*******  
+
+```{r echo=FALSE, comment=NA}
+univariateRevolvingPayments <- function(ProsperDataFrame){
+    plot<- ggplot(ProsperDataFrame, aes(x=OpenRevolvingMonthlyPayment,
+                                        ..density..)) + 
+        geom_histogram(fill="grey",colour="red", alpha = .8,binwidth=50) + 
+        scale_x_continuous(breaks=seq(0,
+            quantile(ProsperDataFrame$OpenRevolvingMonthlyPayment,.99),
+            100),label=function(x){return(paste("$",x))}) + 
+        xlab("amount of monthly revolving payments") + 
+        ggtitle("Distribution of Monthly Payment on Revolving accounts") +
+        theme(axis.text.x=element_text(angle = 75, hjust = .9), 
+              plot.title = element_text(size = rel(1))) + 
+        coord_cartesian(xlim = c(
+            0,quantile(ProsperDataFrame$OpenRevolvingMonthlyPayment,.99))) +
+       facet_grid(Loan_Outcome ~ Prosper_User_Status, margin =TRUE) 
+    
+    return(plot)
+}
+print("Monthly Payments on Revolving Accounts")
+univariateRevolvingPayments(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$OpenRevolvingMonthlyPayment,
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$OpenRevolvingMonthlyPayment,
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*The data shows a trend whereby successful borrowers make just slightly larger monthly payments on their revolving credit accounts then unsuccessful borrowers. Past due borrowers may actually spend the same or more then successful borrowers, this is strange as past due loanees very often mimic unsuccessful loanees in other variables. This suggests that how much you pay on monthly revolving open accounts has some explanatory powers as to whether or not you will be a successful Prosper borrower.  The difference between first time and previous borrowers is more subtle, it does appears that previous prosper borrowers who are past due or unsuccessful tend to spend more on monthly revolving payments then their first time counterparts. Overall previous users spend less monthly then first time users.*       
+
+******* 
+```{r echo=FALSE, comment=NA}
+univariateInquiresLast6Mon <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x = InquiriesLast6Months,
+                                         ..density..)) + 
+        coord_cartesian(xlim=c(0,10)) + 
+        geom_histogram(colour = "orange", fill="dark green", 
+                       alpha = .8, binwidth=1) +
+        scale_x_continuous(breaks = seq(0,10,1)) + 
+        xlab("Number of inquiries") + 
+        ggtitle("Distribution of Inquiries in Last 6 Months") +
+        theme_bw() + 
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margin =TRUE)
+    return(plot)
+}
+print("Inquiries in the Last 6 Months")
+univariateInquiresLast6Mon(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$InquiriesLast6Months, 
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$InquiriesLast6Months, 
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*There appear to be more inquiries into borrowers whose loans are currently past due or unsuccessful. The differences between previous and first time borrowers could be a result of the first credit inquiry Propser made for the borrowers first loan. I would have guessed that there would be more delineation between the groups in this variable.*       
+
+```{r echo = FALSE, comment=NA}
+univariateCurrentDelinquencies <- function(ProsperDataFrame){
+    plot<- ggplot(ProsperDataFrame, aes(x=CurrentDelinquencies,
+                                        ..density.. )) + 
+        geom_histogram(fill="purple", colour="brown", binwidth=1) + 
+        scale_x_continuous(limits = c(0,
+                max(ProsperDataFrame$CurrentDelinquencies)),
+                breaks=seq(0,10,1)) +     
+        coord_cartesian(xlim = c(0,
+                quantile(ProsperDataFrame$CurrentDelinquencies,.99))) +
+        scale_y_continuous(breaks = seq(0,1.0,.1)) +
+        xlab("current delinquencies") + 
+        theme(plot.title = element_text(size = rel(1))) +
+        ggtitle("Distribution of Delinquencies") + 
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margin =TRUE)
+    return(plot)
+}
+print("Number of Currently Delinquent Accounts")
+univariateCurrentDelinquencies(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+dunnTest(Prosper_Post09_Subset$CurrentDelinquencies, 
+    Prosper_Post09_Subset$Loan_Outcome,method="holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$CurrentDelinquencies, 
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*While some differences do exist between my groups of borrowers and groups of loan outcomes, it does not appear visually to be very large. I will consider looking into this variable further as it relates to other variables. There are more delinquent accounts for those borrowers who are past due on their Prosper loans, this is not too suprising. I would argue what is more suprising is the difference between successful loans and unsuccessful loans as it relates to prior delinquencies, I would have guessed the difference to be greater.*        
+
+*******  
+```{r echo = FALSE, comment=NA}
+univariateAmountDelinquent <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x = AmountDelinquent, ..density..) ) + 
+        geom_histogram(color = "blue", fill="grey10", alpha = .6, 
+                       binwidth = 500) +
+        scale_y_sqrt() + 
+        scale_x_continuous(limit=c(0,
+                quantile(ProsperDataFrame$AmountDelinquent,.99)),
+                label=function(x){return(paste("$",x))}) + 
+        xlab("amount delinquent") + 
+        theme(plot.title = element_text(size = rel(1))) +
+        ggtitle("Distribution of Amount Delinquent") + 
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margin =TRUE)
+    return(plot)
+}
+print("Amount Delinquent at time of credit pull")
+univariateAmountDelinquent(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$AmountDelinquent, 
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$AmountDelinquent, 
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*Visual differences are slight. Looking at the scales reveals that most borrowers do not have any amount delinquent at the time of their credit being pulled.*   
+
+*******    
+```{r echo = FALSE, comment=NA}
+univariateRevolvingCredit <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x=RevolvingCreditBalance,
+                                         ..density..) ) +
+        geom_histogram(color = "black", fill = "orange", binwidth = 10) + 
+        scale_x_sqrt(breaks=c(0,100,500,1000,2000,4000,6000,8000,
+                    10000,12500,15000,20000,25000,30000,35000,40000,
+                    45000,50000,60000,75000,90000,100000),
+                    label=function(x){return(paste("$",x,sep=''))}) +
+        xlab("revolving credit balance") + 
+        theme(axis.text.x=element_text(angle = 75, hjust = .9),
+              plot.title = element_text(size = rel(1))) +
+        ggtitle("Distribution of Revolving Credit Balance") +
+        coord_cartesian(xlim = c(0,
+                quantile(ProsperDataFrame$RevolvingCreditBalance, .99))) +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margin =TRUE)
+    return(plot)
+}
+print("Revolving Credit Balance")
+univariateRevolvingCredit(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$RevolvingCreditBalance,
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$RevolvingCreditBalance,
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*Past due and unsuccessfull loans have a higher percentage of borrowers with access to little or no revolving credit on average. For successful loans first time and previous borrowers access to revolving credit looks to be almost the same but previous borrowers who are late on their loans tend to have access to less revolving credit then their first time counterparts. For unsuccessful loans previous borrowers appear to have more access to revolving credit then first time borrowers. I wonder what is going on here?*       
+
+******  
+```{r echo =FALSE, comment=NA}
+univariateBankcardUtil <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x = BankcardUtilization,
+                                         y= ..density..) ) + 
+        geom_histogram(fill = "purple", colour="yellow", 
+                       binwidth = .02, alpha = .9) + 
+        scale_x_continuous(breaks = seq(0,
+            quantile(ProsperDataFrame$BankcardUtilization,.99),.05),
+            label = function(x){return(paste((x*100),"%",sep=''))}) + 
+        xlab("bank card utilization") + 
+        theme(axis.text.x=element_text(angle = 75, hjust = .9),
+              plot.title = element_text(size = rel(1))) +
+        ggtitle("Distribution of the Utilization of Bank Cards") + 
+        coord_cartesian(xlim = c(0,
+            quantile(ProsperDataFrame$BankcardUtilization,.99))) +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margin =TRUE)
+    return(plot)
+}
+print("Percentage of Bank Card Utilization")
+univariateBankcardUtil(Prosper_Post09_Subset)
+```
+
+```{r echo = FALSE,comment=NA}
+dunnTest(Prosper_Post09_Subset$BankcardUtilization, 
+    Prosper_Post09_Subset$Loan_Outcome, method="holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$BankcardUtilization, 
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*Interestingly a large number of Prosper users do not have any credit utilized, at least when their credit was pulled. Additionally it looks like those borrowers who are unsuccessful in their loans have higher percentages of no bankcard utilization. For past due borrowers we see higher percentages on average of nearly 100% bank card utilization. Between the groups of first time and previous borrowers it looks like previous borrowers have higher instances of 100% bank card utilization on avearge across the loan outcomes.*      
+
+********** 
+```{r echo = FALSE, comment=NA}
+univariateTradesNeverDelinquent <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(
+        x=TradesNeverDelinquent..percentage.,..density..) ) + 
+        geom_histogram(colour = "orange", fill="#D55E00", binwidth = .05) + 
+        scale_x_reverse(breaks=seq(0,
+            max(ProsperDataFrame$TradesNeverDelinquent..percentage.),.05),
+            labels = function(x){return(paste(x*100,"%",sep=''))}) +
+        theme(axis.text.x=element_text(angle = 75, hjust = .9),
+              plot.title = element_text(size = rel(1))) +
+        xlab("trades never delinquent") +
+        ggtitle("Distribution of Never Delinquent Trades") + 
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margin =TRUE)
+    return(plot)
+}
+print ("Percent of never Delinquent Trade Lines (credit)")
+univariateTradesNeverDelinquent(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$TradesNeverDelinquent..percentage., 
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$TradesNeverDelinquent..percentage., 
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*Nearly the same distribution across all groups visually, although analytical tests suggest differences between groups, other variables have clearer visual differences. It does look to be the case that for unsuccessful borrowers there is lower percentage of trades never delinquent.*     
+
+*******
+```{r echo = FALSE, comment=NA}
+univariateTradesLast6Months <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes( x = TradesOpenedLast6Months,
+                                          ..density..) ) + 
+        geom_histogram(fill = "dark green", colour = "black", binwidth = 1) + 
+        scale_x_continuous(breaks = seq(0,
+                quantile(ProsperDataFrame$TradesOpenedLast6Months,.99), 1) ) +  
+        xlab("trades opened in the last 6 months") + 
+        ggtitle("Distribution of Trades opened in the Last 6 Months") +
+        theme_bw()+
+        theme(axis.text.x=element_text(angle = 75, hjust = .9),
+              plot.title = element_text(size = rel(1))) + 
+        coord_cartesian(xlim = c(0, 
+            quantile(ProsperDataFrame$TradesOpenedLast6Months,.99)+2)) + 
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margin =TRUE)
+    return(plot)
+}
+print("Number of Trade lines opened in the Last 6 Months")
+univariateTradesLast6Months(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+dunnTest(Prosper_Post09_Subset$TradesOpenedLast6Months, 
+    Prosper_Post09_Subset$Loan_Outcome,method="holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$TradesOpenedLast6Months,
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*Visually very similar, analytical test suggests statistically significant difference between some of my loan groups. I am not sure there is much to learn from this variable as there may be from others.*    
+
+********** 
+```{r echo=FALSE, comment=NA, fig.height=6,fig.width=8}
+univariateDebtToIncome <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x = DebtToIncomeRatio,
+                                         ..density..) ) + 
+        geom_histogram(fill = "purple", colour = "black", binwidth = .025, alpha = .6) +
+        scale_x_continuous(breaks = seq(0, 
+            max(ProsperDataFrame$DebtToIncomeRatio, na.rm=TRUE), .05),
+            labels = function(x){return(paste(x*100,"%",sep=''))}) + 
+        coord_cartesian(xlim = c(0, 1)) +
+        xlab("debt to income ratio") +
+        theme_bw()+
+        theme(axis.text.x=element_text(angle = 75, hjust = .9,
+                                       size=rel(.75)),
+              plot.title = element_text(size = rel(1)) ) +
+        ggtitle("Distribution of Debt to Income Ratio") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, 
+                   scale = "free", margin =TRUE)
+    return(plot)   
+}
+print("Debt to Income Ratio of Borrowers")
+univariateDebtToIncome(Prosper_Post09_Subset)
+```
+
+```{r echo =FALSE,comment=NA, warning=FALSE, message=FALSE}
+dunnTest(Prosper_Post09_Subset$DebtToIncomeRatio,
+    Prosper_Post09_Subset$Loan_Outcome,method="holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$DebtToIncomeRatio, 
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*There appears to be statistically significant differences between first time and previous borrowers allthough the visual differences are minute. It is the case that on average successful loans tend to have borrowers with a lower debt to income ratio then past due and unsuccessful borrowers. It is equally as true thougth that for successful borrowers the most common debt to income ratio is approximately the same as past due and unsuccessful borrowers.*    
+
+******  
+```{r echo=FALSE, comment=NA}
+univariateIncomeRange <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes( x = IncomeRange, 
+                                          y= ..density..,group=1 ) ) + 
+        geom_bar(colour = "yellow", fill = "red") +
+        theme(axis.text.x=element_text(angle = 65, hjust = 1),
+              plot.title = element_text(size = rel(1)),
+              panel.grid.major.x = element_blank() ) + 
+        xlab("income range") +
+        ggtitle("Distribution of Income Range") + 
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, scales = "free")        
+
+    return(plot)
+}
+print("Income Range of Borrowers")
+univariateIncomeRange(Prosper_Post09_Subset)
+```
+
+*There exists a noticable differences between loan outcomes. With  indications that successful loanees tend to have higher incomes then past due and unsuccessful loanees. I found one visually noticable difference between first time and previous borrowers, with previous borrowers who are past due being more likely to be split between low income and high income ranges with less inbetween. Also interesting is the slightly higher income range on average for previous borrwers on unsuccessful loans.*     
+
+************* 
+```{r echo=FALSE, comment=NA}
+univariateIncomeVerifiable <- function(ProsperDataFrame){
+    
+    plot <- ggplot(ProsperDataFrame, aes( x = IncomeVerifiable, 
+                                          y = ..density..,group=1 ) ) +
+        geom_bar(colour="black", fill = "grey" ) + 
+        xlab("verifiable income") + 
+        theme_bw()+
+        theme(plot.title = element_text(size = rel(1))) +
+        ggtitle("Distribution of Verifiable Income") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, scales = "free")
+    return(plot)
+}
+print("Verifiable Income Status")
+univariateIncomeVerifiable(Prosper_Post09_Subset)
+```
+
+*While little visual difference exists between first time and previous borrowers (very slight increase in non-verifiable incomes), there is an increase in non-verifiable incomes as we go down from successful to past due and finally to unsuccessful loans. I am a little suprised that any unverifiable income borrowers are given loans, I would consider this very risky, hopefully Prosper's rating system agrees.*  
+
+```{r,comment=NA}
+#sum(Prosper_Post09_Subset$IncomeVerifiable == "False")
+summary(Prosper_Post09_Subset$ProsperRating[Prosper_Post09_Subset$IncomeVerifiable == "False"])
+
+```
+
+ 
+************* 
+
+```{r echo=FALSE, comment=NA}
+univariateTotalPaymentsBilled <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x=TotalProsperPaymentsBilled,
+                                         ..density.. )) +
+        geom_histogram(aes(fill = ..count..), colour="black", binwidth = 5) +
+        scale_x_continuous(breaks=seq(0,150,10)) + 
+        scale_fill_gradient(low = "red", high = "yellow") +
+        theme(axis.text.x=element_text(angle = 65, hjust = 1,
+                                       size=rel(.5)),
+              plot.title = element_text(size = rel(1)) ) + 
+        xlab("# on time Prosper payments") + 
+        ggtitle("Distribution of On-Time Prior Prosper Loan Payments") + 
+        facet_grid(~Loan_Outcome, scales = "free", margin = TRUE)
+    return(plot)
+}
+print("Number of on time Prosper Payments made (applies to previous borrowers only)")
+univariateTotalPaymentsBilled(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$TotalProsperPaymentsBilled,
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+```
+
+*Some interesting things to see here about previous borrowers and how diligent they were in paying their prior Prosper loans. The distribution seems to show that borrowers who are currently past due or unsuccessful made less payments on their previous loans. Overall I am not sure if the distributions are a result of shorter loan terms or paying loans off early or failing to pay off loans entirely before getting a new loan.*      
+
+********* 
+```{r echo=FALSE,comment=NA, fig.height=5,fig.width=8 }
+univariatLessOneMonthLate <- function(ProsperDataFrame) {
+    plot <- ggplot(ProsperDataFrame, aes(
+        x=ProsperPaymentsLessThanOneMonthLate,..density..)) + 
+        geom_histogram(colour="white", fill = "dark green", binwidth = 1) + 
+        scale_x_continuous(breaks = seq(0,10,1)) + 
+        coord_cartesian(xlim = c(0,10)) +
+        theme(axis.text.x=element_text(angle = 65, hjust = 1),
+              plot.title = element_text(size = rel(1)) ) + 
+        xlab("Prosper payments < 1-month late") +
+        ggtitle("Distribution of Less than 1-month late Prosper Payments") +
+        facet_grid(~Loan_Outcome, scales = "free", margin =TRUE)
+    return(plot)
+}
+print("Prosper Payments Less Then One Month Late (applies to previous borrowers only)")
+univariatLessOneMonthLate(Prosper_Post09_Subset)
+```
+
+*For previous borrowers there is a clear shift in distributions showing that past due and unsuccessful borrowers have more 'less then one month late payments'. It is possible that prosper is able to far more accurately rate returning borrowers as result of such clear differences as this one.*  
+
+*************
+```{r echo=FALSE,comment=NA, fig.height=5, fig.width=8}
+univariateMoreOneMonthLate <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x=ProsperPaymentsOneMonthPlusLate,
+                                         ..density..)) + 
+        geom_histogram(colour="white", fill = "dark green", binwidth = 1) + 
+        scale_x_continuous(breaks = seq(0,5,1)) + 
+        coord_cartesian(xlim = c(0,5)) +
+        theme(axis.text.x=element_text(angle = 65, hjust = 1),
+              plot.title = element_text(size = rel(1)) ) + 
+        xlab("Prosper Payments > 1-month late") +
+        ggtitle("Distribution of More than 1-month Late Prosper Payments " ) +
+        facet_grid(~Loan_Outcome, scales = "free", margin =TRUE)
+    return(plot)
+}
+print("Prosper Payments More Than One Month Late (applies to previous borrowers only)")
+univariateMoreOneMonthLate(Prosper_Post09_Subset)
+```
+
+*Very small differences between loan outcomes. It appears that very few previous Prosper's user had any late payments. This could be a result of investors having more knowledge of borrowers who have already had a Prosper loan and are unwilling to invest in a borrower who was more then 1 month late on their previous Prosper loan.*       
+
+*********** 
+```{r echo=FALSE, comment=NA, fig.height=6, fig.width=10}
+univariatePriorPrincinpleBorrowed <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes(x = ProsperPrincipalBorrowed,
+                                         ..density..) ) +
+        geom_histogram(colour="white", fill = "orange", binwidth = 1000) + 
+        scale_x_continuous(breaks = seq(0,40000,2000), 
+                           label=function(x){return(paste("$",x))} ) +
+        coord_cartesian(xlim=c(0,40000)) +
+        theme(axis.text.x=element_text(angle = 65, hjust = 1, 
+                                       size=rel(.8)),
+              plot.title = element_text(size = rel(1)) ) +
+        xlab("prior Prosper prinicipal borrowed") + 
+        ggtitle("Distribution of Principals Borrowed") +
+        facet_grid(~Loan_Outcome, scales = "free")
+    return(plot)
+}
+print("Prosper Principle Borrowers by Previous Borrowers (applies to previous borrowers only)")
+univariatePriorPrincinpleBorrowed(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$ProsperPrincipalBorrowed,
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+```
+*Appears to be a trend whereby higher loan priniciples are associated with a larger number successful loans on average.*    
+
+*******  
+```{r echo=FALSE, comment=NA, fig.height=5, fig.width=10}
+univariatePriorPrincipleOutstanding <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes( x = ProsperPrincipalOutstanding,
+                                          ..density..) ) +
+        geom_histogram(colour="grey", fill = "gold", binwidth = 500) +  
+        scale_x_continuous(breaks = seq(0,20000,1000), 
+                           label=function(x){return(paste("$",x))} ) +
+        coord_cartesian(xlim=c(0,20000)) +
+        theme(axis.text.x=element_text(angle = 65, hjust = 1),
+              plot.title = element_text(size = rel(.8)) ) +
+        xlab("prior Prosper principal outstanding") + 
+        ggtitle("Distribution of Prior Prosper Principals Outstanding") +
+        facet_grid(~Loan_Outcome, scales = "free")
+    return(plot)
+}
+print("Prosper Principle Outstanding (applies to previous borrowers only)")
+univariatePriorPrincipleOutstanding(Prosper_Post09_Subset)
+```
+
+*Very interesting differences between loan outcomes. Successful loans appear to have much smaller to non-exist prior principles outstanding. Between past due and unsuccessful loans past due borrowers have a more bimodal distribution and unsuccessful loans are more reflective of successful loans but show higher outstanding prior principles on average. Not entirely sure why this is.*   
+
+*******  
+```{r echo=FALSE, comment=NA}
+univariateCurrentDaysDelinquent <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes( x = LoanCurrentDaysDelinquent,
+                                          ..density..) ) +
+        geom_density(fill = "red", alpha = .5) + 
+        scale_x_continuous(breaks=seq(0,1400,50 ) ) +
+        coord_cartesian(xlim=c(0,1400)) +
+        theme(axis.text.x=element_text(angle = 65, hjust = 1),
+              plot.title = element_text(size = rel(1)) ) +
+        guides(fill = guide_colorbar(barwidth = .9) ) +
+        xlab("current days loan has been delinquent") + 
+        ggtitle("Density Distribution of Current Days Delinquent") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, 
+                   scales = "free", margin = TRUE)
+    return(plot)
+}
+print("Current Days Delinquent")
+univariateCurrentDaysDelinquent(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$LoanCurrentDaysDelinquent,
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$LoanCurrentDaysDelinquent,
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+```
+
+*While there is a difference between first time and previous borrowers I am not sure that I want to delve any deeper into this particular variable. It is evident that days delinquent will have a direct relationship with my loan outcome groupings. The interesting trends in this data are the slightly different distributions between first time borrowers and previous borrowers.*    
+
+**********   
+```{r echo=FALSE, comment=NA}
+univariateOriginationAmount <- function(ProsperDataFrame){
+    plot<- ggplot(ProsperDataFrame, aes( x = LoanOriginalAmount, 
+                                         ..density..) ) +
+        geom_histogram(fill="purple", colour="brown", binwidth = 1000) +
+        scale_x_continuous(breaks=seq(0,36000,2000), 
+                           labels=function(x){return(paste("$",x))} ) + 
+        theme(axis.text.x=element_text(angle = 65, hjust = 1),
+              plot.title = element_text(size = rel(1)) ) +
+        xlab("amount of loan") + 
+        ggtitle("Distribution of Loan Origination Amounts") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status,margin = TRUE)
+    return(plot)
+}
+print("Amount of the Loan Origination")
+univariateOriginationAmount(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$LoanOriginalAmount, 
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$LoanOriginalAmount, 
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+```
+
+*I see very similar loan origination amounts roughly $4000, $10,000 and $16,000 being far and away the most commonly requested loan amounts. The difference between the groups lie in the distributions between these popular amounts. $4,000 loans appear to have the most risk, with very high percentages of past due and unsuccessful rates, however they are also the most common loan origination amount.* 
+
+************* 
+```{r echo=FALSE, comment=NA}
+univariateMonthlyPayment <- function(ProsperDataFrame){
+    plot <- ggplot(ProsperDataFrame, aes( x = MonthlyLoanPayment, 
+                                          ..density.. ) ) + 
+        geom_histogram(aes(fill = ..count..), colour="white", binwidth = 50) + 
+        scale_fill_gradient(low="#330066", high="#FFCCFF") + 
+        scale_x_continuous(breaks=seq(0, 1300, 100), 
+                           labels=function(x){return(paste("$",x))} ) + 
+        coord_cartesian(xlim=c(0,1300)) + 
+        theme(axis.text.x=element_text(angle = 65, hjust = 1),
+              plot.title = element_text(size = rel(1)) ) +
+        guides(fill = guide_colorbar(barwidth = .9) ) +
+        xlab("monthly loan payment") + 
+        ggtitle("Distribution of Monthly Loan Payments") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margin= TRUE)
+    return(plot)   
+}
+print("Monthly Propser Loan Payment")
+univariateMonthlyPayment(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$MonthlyLoanPayment, 
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$MonthlyLoanPayment, 
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*Most loan payments hover at $150 likely a result of a popular loan payment at 36 months ($4000 origination?). previous borrowers tend to be more normally distributed when it comes to ranges of monthly loan payments, probably the result of having a more normal distribution of loan origination amounts. The difference between the loan outcomes show a trend towards current loanees with higher monthly payments on what I presume are larger loans. There does appear to be less loan failures in the higher monthly loan payments.*    
+
+***********   
+```{r echo=FALSE, comment=NA}
+univariateInvestors <- function(ProsperDataFrame){
+    plot<- ggplot(ProsperDataFrame, aes(x = Investors ) ) +
+        stat_bin(aes(y=..density..,group=1),binwidth = 10, 
+                 fill="gold",colour="brown") +
+        scale_x_continuous(breaks=seq(0,500,20) ) +
+        coord_cartesian(xlim=c(0,quantile(ProsperDataFrame$Investors,.99))) + 
+        theme(axis.text.x=element_text(angle = 65, hjust = 1),
+              plot.title = element_text(size = rel(1)) ) + 
+        xlab("number of investors") +
+        ggtitle("Number of Investors per Loan") + 
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, 
+                   margin= TRUE, drop=TRUE)
+    return(plot)   
+}
+print("Number of Investor")
+univariateInvestors(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$Investors, 
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$Investors, 
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*Trend towards fewer investors in current loans whereas successful loans tend to have more natural poisson distribution. There also tends to be a higher rate of past due and unsuccessful loans with few investors.*     
+
+***********
+```{r echo=FALSE, comment=NA}
+univariateCreditRange <- function(ProsperDataFrame){
+    plot <- ggplot(subset(ProsperDataFrame, credit_range %in% 
+                c("640-659","660-679","680-699","700-719","720-739",
+                  "740-759","760-779","780-799","800-819","820-839",
+                  "840-859","860-879","880-899")), 
+                aes( x = credit_range, y = ..density..,group=1) ) +
+        geom_bar(fill = "#0099CC", colour="black") +
+        xlab("average credit scores") +
+        theme(axis.text.x=element_text(angle = 65, hjust = 1),
+              plot.title = element_text(size = rel(1)) ) +
+        ggtitle("Distribution of Credit Range") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margin = TRUE)
+    return(plot)
+}
+print("Credit Range")
+univariateCreditRange(Prosper_Post09_Subset)
+```
+
+*The credit range contains some interesting data between the loan outcomes but the difference between the first time and previous borrowers is likely affected by a policy change at Prosper that made a minimum credit score of 640 a requirement for borrowers, where no minimum existed before (this meant a different distribution existed, therefore the previous borrowers distribution in not exclusively the result of being a returning borrower, but includes a different population of borrowers). As a result I will not directly compare this variable across first time and previous borrowers and will instead look at differences between outcomes understanding that the loan listings have a few listings where the bottom population in terms of credit scores has been removed.*
+
+```{r,comment=NA}
+summary(Prosper_Post09_Subset$credit_range)
+sum(Prosper_Post09_Subset$credit_range %in% c("600-619","620-639"))
+```
+
+
+*******   
+```{r echo=FALSE, comment=NA}
+univariateCreditHistory <- function(ProsperDataFrame){
+    plot<- ggplot(ProsperDataFrame, aes( x = credit_history_years,
+                                         ..density..) ) +
+        geom_histogram(fill= "#FF3300", colour="grey7", binwidth = 1, 
+                       alpha = .5) +
+        geom_density() +
+        scale_x_continuous(breaks=seq(0,60,2) ) +
+        coord_cartesian(xlim=c(0,60) ) + 
+        theme(axis.text.x=element_text(angle = 65, hjust = 1),
+              plot.title = element_text(size = rel(1)) ) + 
+        xlab("credit length (years)") + 
+        ggtitle("Distribution of Credit Length in Years") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, 
+                   scales = "free", margin = TRUE)
+    return(plot)
+}
+print("Length of Credit History")
+univariateCreditHistory(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+dunnTest(Prosper_Post09_Subset$credit_history_years, 
+    Prosper_Post09_Subset$Loan_Outcome,method='holm')
+pairwise.wilcox.test(Prosper_Post09_Subset$credit_history_years, 
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "none")
+
+```
+
+*Not an aweful lot of visual difference, there might be a slight tendency towards shorter credit history on past due and unsuccesful loans but its hard to pick out visually. The analytcial test does suggest likely different distributions among most of the loan outcomes and the user statuses.*    
+
+***********
+```{r echo=FALSE, comment=NA}
+univariateLoantoMonthIncome <- function(ProsperDataFrame){
+    ProsperDataFrame$payment_to_monthly_income[
+        ProsperDataFrame$payment_to_monthly_income > 1.0] <- 1.01 
+    plot <- ggplot(ProsperDataFrame, aes( x = payment_to_monthly_income,
+                                          ..density..,group=1) )  +
+        scale_x_continuous(breaks = seq(
+            0,max(ProsperDataFrame$payment_to_monthly_income), .05), 
+            labels = function(x){return(paste(x*100,"%",sep=''))}) +
+        geom_histogram(fill="#00FFCC", color="black", binwidth = .025) +
+        xlab("loan payment as a percentage of monthly income") +
+        theme(axis.text.x=element_text(angle = 75, hjust = 1),
+              plot.title = element_text(size = rel(1)) ) + 
+        ggtitle("Distribution of Loan Payments to Monthly Income") +
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, margin = TRUE)
+    return(plot)   
+}
+print("Loan Payment to Monthly Income")
+univariateLoantoMonthIncome(Prosper_Post09_Subset)
+```
+
+```{r echo =FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$payment_to_monthly_income,
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$payment_to_monthly_income,
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*We see a larger portion of successful loan outcomes are associated with loan payments constituting a smaller portion of a borrowers monthly income. It also looks like previous borrowers more then first time borrowers tend to borrow loans such that their payments to income ratio is less on average then first time borrowers. For the most part monthly loan payments do not exceed ~20% of income for any borrower ( a few exceptions in the unsuccessful loan outcome group).*     
+
+***************
+```{r echo=FALSE, comment=NA, fig.width = 8, fig.height = 15}
+univariateLenderReturn <- function(ProsperDataFrame){
+    plot <- ggplot(subset(ProsperDataFrame, Loan_Outcome %in% 
+                c("Successful Loan", "Unsuccessful Loan")), 
+                aes( x = lender_return) ) +
+        geom_histogram(aes(y=..density..,group=1, fill =sign(..x..)),
+                       binwidth = .025,colour="black",alpha = .8)  +
+        scale_x_continuous(breaks = seq(-1,.6,.05),
+            labels = function(x){return(paste(round(x*100,2),"%",sep=''))}) + 
+        theme(axis.text.x=element_text(angle = 65, hjust = 1,
+                                    size=rel(.5)),
+              plot.title = element_text(size = rel(1)) ) + 
+        guides(fill=FALSE) + 
+        coord_flip(xlim =c (-1.0,.8)) + 
+        xlab("return to lenders on loans") +
+        ggtitle("Distribution of Returns on Loans to Lenders") + 
+        facet_grid(Loan_Outcome ~ Prosper_User_Status, 
+                   scales = "free_y",margin = TRUE)        
+    return(plot)
+}
+print("Lender Return Rate")
+univariateLenderReturn(Prosper_Post09_Subset)
+```
+
+```{r echo=FALSE,comment=NA}
+pairwise.wilcox.test(Prosper_Post09_Subset$lender_return, 
+    Prosper_Post09_Subset$Loan_Outcome, p.adjust.method = "holm")
+
+pairwise.wilcox.test(Prosper_Post09_Subset$lender_return, 
+    Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
+```
+
+*We can see from looking at all of the combined data that very few loans result in a loss, but when they do (unsuccessful loans) the loss is usually quite high, almost the whole value of an investors principle.*     
+
+```{r echo=FALSE}
+#univariateCurrentCreditLines <- function(ProsperDataFrame){
+#    plot <- ggplot(ProsperDataFrame, aes(x=CurrentCreditLines,
+#                                   ..density..) ) + 
+#        geom_histogram(color="brown",fill="grey", binwidth=1) +
+#        coord_cartesian(xlim = c(
+#               0,quantile(ProsperDataFrame$CurrentCreditLines,.99)+2 )) +
+#        scale_x_continuous(breaks = seq(
+#               0,quantile(ProsperDataFrame$CurrentCreditLines,.99),2)) + 
+#        xlab("number of current credit lines") +
+#        theme(plot.title = element_text(size = rel(1)),
+#               axis.text.x=element_text(angle = 75, hjust = .9)) +
+#        ggtitle("Distribution of Credit Lines by") + 
+#        facet_grid(Loan_Outcome ~ Prosper_User_Status, 
+#                   scale = "free", #margin = TRUE)    
+#    return(plot)
+#}
+#univariateCurrentCreditLines(Prosper_Post09_Subset)
+
+```
+
+*******         
+
+##Part 1 Analysis - Univariate Analysis     
+
+### Structure of the dataset?
+```{r echo=FALSE,comment=NA}
+summary(Prosper_Post09_Subset)
+#table(Prosper_Post09_Subset$Investors)
+```
+
+After pairing down the original Prosper data set (~114,000 listings with 81 variables) and adding a few variables of my own I began my analysis with 84,881 loan listings with 38 features. These features contain ordinal numbers, dates, factor variables and ratios. The key factor variables that I generated in my pursuit of my goal of this analysis, are the loan outcome variable; Current, Successful, Past Due and Unsuccessful. And Prosper User Status; First Time Borrowers and Previous Borrower. In continuing my analysis I will look far more narrowly at the summary features, such as Prosper rating, credit range, lender return, estimated borrower APR, estimated lender return, Prosper user status and loan outcome.        
+
+I believe that by looking into all of the features in my uni-variate plots above we can form a better understanding of what makes a borrower a safer or riskier prospect without looking at just one number (e.g. Prosper Rating) which may be an accurate measurement of risk but doesn't explain how the number was derived.          
+
+There are a total of 65,059 first time borrowers and 19,822 previous borrowers. Such a return rate is possibly reflective of Prosper's loan marketplace working successfully (in the sense that borrowers are coming back and lenders are reinvesting in the loanees). Most loans in this data-set are current (i.e. still on-going), 56,576 to be exact. This means that they are not past due or delinquent in any way and are making payments successfully. These loans will be in different stages of their life (just beginning all the way to their second to last month) but If we continue looking into the loan outcome variable we can hypothesize that many of these loans will be successful based on the following evidence. Of the 26,238 concluded loans, 19,894 of them are successful, this means that they have been completed or are on their last payment.  There are 6,344 loans which are unsuccessful, meaning these loans have been charged off (written off), cancelled or are delinquent. Finally in the whole data set there are 2,067 loan listings currently in some stage of past due, these loans are late but not yet failures. At a 3 to 1 success rate (for this snapshot data-set) the number of successful loans in my opinion is to high to declare Prosper's loan marketplace a failure.      
+
+It will be interesting to explore further in this analysis whether or not these roughly 6,000 borrowers were rated as a high risk or if they recieved more favorable scores on metrics designed to measure risk (Prosper rating, credit range). If many of these borrowers were given scores indicating very high risk then we can conclude that Prosper is doing a good job of accurately informing its investors of potential risks.       
+
+The median return rate for all loans is:  ~8%, while the median estimated return rate hovers right around 9%.       
+The most common credit scores for Prosper borrowers is in the range: 660-679 (not terribly high).       
+The most common Prosper rating is: 4 ( out of 7, 1 being the worst, 7 the best).       
+The most common loan origination amount is: $4,000.       
+Most Prosper borrowers have a reported income in the range of: $50,000-$74,999       
+The most common reason given for the loan request is: Debt Consolidation.      
+The most common term length for a Prosper loan is: 36 months.        
+The most common number of investor for a Prosper loan is: 1.          
+
+### The main features of interest in this dataset?
+The main features of interest in my data set are the loan outcomes, the lender return(numeric representation of loan outcomes), credit-range and Prosper ratings. Remember that the goal is to determine if Prosper provides a viable platform for individual investor to make loans without so much undo risk that it keeps the average investor from considering the Prosper marketplace as a viable investment option. Ultimately I would like to see if this style of open marketplace for loans can displace institutional loans and whether or not Prosper can adequately bridge the gap of asymmetric information for borrowers and lenders. The achievement of this goal would manifest itself in investors who achieved positive gain on their investments, received higher returns on riskier investments and where a loan does fail the investor was adequately warned with high risk scores on Prosper rating system.
+
+###Other features in the dataset that help support my investigation into the features of interest?
+I've looked into many features most of which have some value in regards to whether or not individual investors are able to use them to accurately account for borrower risk. Moving forward I will narrow my focus to a smaller number of variables to be plotted in multi-variate plots as they relate to the Prosper rating systems of risk and reward seen by lenders. Some of these features will be debt to income ratios, estimated returns, number of investors, Prosper user status, and Prosper loan payment to income ratio and of course lender returns and lender outcome. 
+
+###Creation of new variables from existing variables in the dataset?
+I created several new variables, Prosper User Status; this variable reflects whether the loan listing is from a previous Prosper borrower or a first time Prosper borrower. Loan Outcome; this variable is an aggregation of the loan status variable into just 4 categories, current loans, successful loans, past due loans, and unsuccessful loans. Credit range, this variable combined the upper and lower bound credit scores into a range between those two. credit history in years was created by looking into the first reported credit date and the date of the latest credit check, subtracting those two and converting them into years. Payment to monthly income variable was created to reflect how much of a borrowers income was spent on payments for their Prosper loan. Finally I created lender return to reflect the actual interest that an investor sees from their loans to borrowers. This variable is most informative for successful and unsuccessful loans. 
+
+###Unusual distributions? Operations on the data to tidy, adjust, or change the form of the data? why?
+I performed several operations on the data, to begin with I transformed all of the date times to reduce the detail to just the month day and year. I also factored variables which should be categorical(many the ones I created). I filtered my data to remove all loan listing before a certain date (2009). I created a function to change the state abbreviations for the purpose of graphing a map with frequency of borrowers by state. Several of my plots have had their axis's transformed by square root functions and most have been constrained to reflect only feature data up to the $99^{th}$ quantile in order to weed out potential outliers. All of my plots reflect the density distributions as a result of the data containing large ranges in the scales and different scales between my facet variables. I reordered several of the factor variables so that the axis label orders made more sense in my opinion. I dropped several variables on the basis of their containing mostly 'NA' values. I renamed several of my variables in order to shorten the length of feature names. All of the percentages on the x-axis are decimals which I converted only for the plot labels. Additionally for the payments to monthly income variable whose loan listings provided no income information were lumped into the category of borrowers whose payments are more then 100% of their income. There were only ten listings above 100% after this operation therefore whatever error was involved in my decision to impute the data in this fashion is hopefully minor.  
+
+*******************  
+##Part 2 - Multivariate & Final plots
+The following plots represent a narrowing of focus to variables I believe most helpful in judging the viability of Prosper's ranking systems. The plots are concerned with variables designed to show whether or not Prospers rating system is effective and if it is superior to the standard credit score. In addition I explore several other variables that appear to have a strong relationship with lender return. The goal here is to determine if the Prosper system truthfully identifies risk in borrowers, this ideally would be seen in low numbers of unsuccessful loans and those loans that are unsuccessful should all have lower credit scores and lower Prosper ratings (1-worst or most risky, 7-best or least risky). The other variables not directly related to credit ranges and Prosper ratings are variables which I felt would offer explanatory power of lender return without having such mysterious origins. 
+
+###Plots
+```{r echo=T,fig.height=15,fig.width=10}
+## The pairs plot not only takes a while to render on my machine but even with 
+## the limited number of variables does not visually offer much value. I will 
+## instead explore these variables and others in more depth using a larger 
+## number of individual plots. 
+
+#ggpairs(Prosper_Post09_Subset[,c("lender_return","credit_range",
+#"Loan_Outcome","Prosper_User_Status","ProsperRating","EstimatedReturn",
+#"BorrowerAPR")],axisLabels = "internal")
+
+## NOTE:
+# I found The [R Graphics CookBook](https://rpubs.com/escott8908) an
+# invaluable resource when constructing and editing many of my graphs. 
+# Edgar James Scott II is the author and the resource is on RPubs. 
+# Several of my layer ideas came from here, in addition I found many 
+# different ggplot methods, options, and geoms for detailing my plots. 
+
+## Background fill technique (annotate) found in some of the plots courtesy of sc_evans on 
+# http://stackoverflow.com/questions/17521438/geom-rect-and-alpha-does-this-work-with-hard-coded-values
+
+
+```
+
+**Helper Functions - Multi-Variate**
+```{r echo=TRUE, message=FALSE, warning=FALSE, comment=NA}
+
+ProsperData_concludedLoans <- function(ProsperDataFrame){
+#
+#   Input: Prosper Data Frame
+#
+#   Output: Prosper Data Frame containing only those rows were the loan outcome
+#   is either successful of unsuccessful. In other words include only those
+#   listings where the loan has concluded
+#
+    ProsperDataFrame_subset <- subset(ProsperDataFrame, 
+                    Loan_Outcome %in% c("Successful Loan", "Unsuccessful Loan"), 
+                    drop = T)
+    
+    # remove the unused levels from the factor variable Loan_Outcome
+    Prosper_DataFrame_Model_subset <- droplevels(ProsperDataFrame_subset)
+    return(Prosper_DataFrame_Model_subset)
+}
+
+df <- ProsperData_concludedLoans(Prosper_Post09_Subset)
+#View(df)
+
+##Helper Function for Plotting Mosaic plots of Prop.table frequency for nested or heirarchical factor variables
+
+## following mosiac plotter thanks to Edwin on Stackoverflow: 
+# http://stackoverflow.com/questions/19233365/how-to-create-a-marimekko-mosaic-plot-in-ggplot2, 
+# the vast majority of the code is his I added relevent labels, 
+# titles and adjusted some text angles and removed size legend.  
+
+ggMMplot <- function(var1, var2,xlab,ylab,title){
+
+  levVar1 <- length(levels(var1))
+  levVar2 <- length(levels(var2))
+
+  jointTable <- prop.table(table(var1, var2))
+  plotData <- as.data.frame(jointTable)
+  plotData$marginVar1 <- prop.table(table(var1))
+  plotData$var2Height <- plotData$Freq / plotData$marginVar1
+  plotData$var1Center <- c(0, cumsum(plotData$marginVar1)[1:levVar1 -1]) +
+    plotData$marginVar1 / 2
+
+  ggplot(plotData, aes(var1Center, var2Height)) +
+    geom_bar(stat = "identity", aes(width = marginVar1, fill = var2), col = "Black") +
+      scale_fill_hue(ylab) +
+    geom_text(aes(label = as.character(var1), x = var1Center, y = 1.05, angle = 45, size=1) )+  
+    scale_x_continuous(breaks=seq(0,1,.05)) + 
+    scale_y_continuous(breaks=seq(0,1,.05)) + 
+    theme(axis.text.x=element_text(angle = 45, hjust = 1),
+          legend.key.size = unit(0.5,'cm'),
+          legend.text = element_text(size=rel(.75))) + 
+    xlab(xlab) + 
+    ylab(ylab) + 
+    guides(size= F) +
+    ggtitle(title) 
+  }
+
+
+```
+**Analytical Correlation Test**  
+```{r echo=TRUE, comment=NA, message=FALSE,warning=FALSE}
+## Using the polycor package I ran a hetergeneous correlation analysis 
+# which interprets standard numerical vs. numerical, polyserial and
+# polychoric correlation analysis for my ordinal and factor variables.
+corr <- hetcor(df[,
+            c("EstimatedReturn","lender_return","credit_range",
+              "Loan_Outcome","ProsperRating","Prosper_User_Status",
+              "DebtToIncomeRatio", "IncomeRange","IsBorrowerHomeowner",
+              "Investors","BorrowerAPR"
+              )],use="pairwise.complete.obs", digits = 5, std.err=FALSE)
+
+cat("Correlation Analysis:","\n")
+corr[1]
+```
+
+```{r echo=FALSE, warning=FALSE,message=FALSE, fig.width=14, comment=NA}
+print("Mosiac plot of Prosper ratings by credit ranges")
+ggMMplot(df$credit_range,
+          df$ProsperRating, "Credit Ranges (porportions)", "Prosper Rating (porportions)", "Frequency of Prosper Ratings for frequency of Credit Ranges")
+```
+
+*This chart has some crowding in the credit-range labels but still has some visual value. This mosiac plot is charting the porportions of credit_ranges and nested porportions of Prosper ratings. We can see a that for extremes of credit ranges we do not see very many borrowers and that for higher credit ranges we see larger portions of higher Prosper ratings (1=worst, 7=best). We would expect to see this given that credit range from the previous chart did a good job of explaining lender return. Given this fact it is not to much of a stretch to believe that the Prosper rating would largely reflect the credit ranges. There is suprisingly a large range of Prosper rating for all of the credit ranges even the lowest and highest suggesting some deviation between the ratings and the credit ranges.* 
+
+```{r echo=FALSE, comment=NA}
+creditRangebyProsperRating <- function(ProsperDataFrame){
+    ## remove those credit_ranges below 640, Prosper changed requirments establishing a minimum credit score of 640 where none had existed before. To compare between first time and previous borrowers I am removing those lisiting that are a slightly different population (below 640 credit score). 
+    plot <- ggplot(subset(ProsperDataFrame,credit_range %in% 
+                c("640-659","660-679","680-699","700-719","720-739",
+                  "740-759","760-779","780-799","800-819","820-839",
+                  "840-859","860-879","880-899") ), 
+                aes(x=ProsperRating, y = lender_return)) +
+            geom_boxplot(fill = "grey50", aes(colour = "brown"), 
+                outlier.colour = "brown", outlier.shape = 2, 
+                outlier.size=.5, alpha = .2) +
+            geom_boxplot(aes(fill = credit_range), alpha = .8) +
+            annotate("rect", xmin = 0, xmax=Inf, ymin=-1, ymax=0, alpha =.05, 
+                fill="red") + 
+            annotate("rect", xmin = 0, xmax=Inf, ymin=0, ymax=1, alpha =.05, 
+                fill="blue") +
+            coord_cartesian(ylim = c(-1,.8), xlim = c(0.5,7.5)) + 
+            scale_y_continuous(breaks=seq(-1,1,.05), 
+            labels = function(x){return(paste(round(x*100,2),"%",sep=''))}) + 
+            scale_color_manual("Prosper Rating", values=c("brown")) +
+            theme_bw() +
+            theme(axis.text.x=element_text(angle = 75, hjust = 1),
+                legend.key.size = unit(0.5,'cm'),
+                legend.text = element_text(size=rel(.75)), 
+                panel.grid.major.x = element_blank()) +
+            geom_hline(y=0,linetype="dashed", colour = "black", alpha = .8, 
+                size = .5) +
+            xlab("Prosper Rating") + 
+            ylab("Lender Return") + 
+            ggtitle("Lender returns by borrower's credit ranges grouped by
+                    Prosper rating")
+    return(plot)
+}
+print("Lender return as a function of Prosper ratings and nest credit ranges ")
+creditRangebyProsperRating(df) 
+```
+
+*The plot suggests that Prosper ratings contain a broad range of credit_ranges, hinting that more goes into the crafting of Prospers Rating then just the credit score. That being said we  see a trend of lower credit ranges for lower Prosper ratings and higher ranges for higher ratings. It's clear that credit ranges are not perfect predictors when we look at a couple of the Prosper ratings whose I.Q.Rs are strictly in the positive returns we see that some of the higher credit ranges I.Q.Rs extend into the negative returns while lower credit range to do not. Again with the exception of a weird fluke (Pros. Rating 4, credit range: 860-879) all the median values lie in positive return territory. It looks like we see the longest I.Q.Rs for the middle range credit scores. Could be a result of most Propser borrowers falling into the middle credit range categories.* 
+
+```{r echo=FALSE, comment=NA}
+compareCreditRangetoRating <- function(ProsperDataFrame){
+    plot1 <- ggplot(ProsperDataFrame,
+                aes(x=credit_range,..density..,group=1)) + 
+            geom_histogram(data = subset(Prosper_Post09_Subset, 
+                Loan_Outcome %in% c("Successful Loan")),
+                fill = "blue", colour = "black", alpha=.8) + 
+            geom_histogram(data = subset(Prosper_Post09_Subset, 
+                Loan_Outcome %in% c("Unsuccessful Loan")),
+                fill = "red", colour="black", alpha = .8) +
+            xlab("Credit Ranges") + 
+            ylab("Number of listings") + 
+            theme(axis.text.x=element_text(angle = 45, hjust = 1), 
+                panel.grid.major.x = element_blank()) + 
+            facet_wrap(~Loan_Outcome)#, scales = "free")
+
+    plot2 <- ggplot(ProsperDataFrame, 
+                aes(x=ProsperRating,..density..,group=1)) + 
+            geom_histogram(data = subset(Prosper_Post09_Subset, 
+                Loan_Outcome %in% c("Successful Loan")),fill = "blue",
+                colour = "black", alpha= .8) + 
+            geom_histogram(data = subset(Prosper_Post09_Subset, 
+                Loan_Outcome %in% c("Unsuccessful Loan")),fill = "red",
+                colour="black", alpha = .9) +
+            xlab("Prosper Ratings") + 
+            ylab("Number of listings") + 
+            theme(axis.text.x=element_text(angle = 45, hjust = 1), 
+                panel.grid.major.x = element_blank()) + 
+            facet_wrap(~Loan_Outcome)#, scales = "free")
+    return(grid.arrange(plot1,plot2, ncol = 1))
+}
+print("Density of Listing be credit range and by Prosper rating for loan outcomes")
+compareCreditRangetoRating(df)
+```
+
+*For both credit range and Prosper rating we can see that for unsuccessful loans we have on avarage higher numbers of loan listings with lower credit ranges and Prosper ratings. It does appear the the Prosper rating does a better job of accurately rating with a low score those loans that do wind up failing. Its also good to see more uniform distribution of lisiting counts of successful loans accross all the ratings, this is a good sign for borrowers who can tolerate a higher degree of risk (can acheive higher returns without worrying overly much that they will loss their investment). Given that the unsuccessful loans listing counts are heavily skewed towards lower scores and yet there is still a large portion of low ratings in the successful loans it could be the case that Prosper is a bit conservative in their rating system.*  
+
+```{r echo=FALSE, message=FALSE,warning=FALSE, comment=NA}
+estimatedVsActualReturn <- function(ProsperDataFrame){
+
+    plot <- ggplot(ProsperDataFrame, 
+                aes(x = lender_return, y = EstimatedReturn, na.rm=TRUE)) + 
+        geom_point(aes(colour = sign(lender_return)),alpha = 1) + 
+        scale_color_continuous(low="red", high="dodgerblue1") +
+        stat_binhex(limits = c(0,800), alpha = .5)+
+        scale_fill_gradient(low="grey89", high ="black") +
+        coord_cartesian(xlim = c(-1,1)) + 
+        scale_x_continuous(breaks = seq(-1,1,.05), 
+            labels = function(x){return(paste(round(x*100,2),"%",sep=""))}) + 
+        scale_y_continuous(breaks = seq(-.2,.3, .05),
+            labels = function(x){return(paste(round(x*100,2),"%",sep=""))} ) + 
+        geom_hline(y=0, color = "black", linetype="dashed") + 
+        geom_vline(x=0, color = "black", linetype="dashed") +
+        geom_abline(aes(intercept = 0, slope = 1, colour="red",
+                    linetype="solid"), colour = "red", show_guide = TRUE) +
+        scale_linetype_manual("Perfect Prediction Line", values = 1) + 
+        xlab("Lender Return (Overall)") + 
+        ylab("Estimated Return (Overall)") + 
+        ggtitle("Estimated vs Actual Return on Investment") + 
+        theme_bw() + 
+        theme(axis.text.x=element_text(angle = 45, hjust = 1)) + 
+        guides(colour=FALSE) 
+    return(plot)
+}
+print("Estimated returns mapped against actual returns")
+estimatedVsActualReturn(df)
+```
+
+*It is interesting to see any loan listings whose estimated return is less then 0% being funded. This plot and the next emphasize just how hard the real world is to predict and model. While not completely off bases the estimated returns is not anywhere near perfectly correlated with actual returns seen. We can double check this conclusion if we look at the correlation analysis run previously. Returns are both a lot less and a lot more then predicted. Many of the negative actual returns were seen for higher estimated returns, this is good in that it suggests that Prosper loan risk is being rewarded with higher estimated returns.*
+
+```{r echo=FALSE, comment=NA}
+estimatedVsActualReturnsDensity <- function(ProsperDataFrame){
+    
+    plot <- ggplot(ProsperDataFrame, 
+                aes(x=lender_return, y= ..density.., group=1)) + 
+            coord_cartesian(xlim=c(-1,1)) + 
+            geom_histogram(aes(fill = "actual"), colour = "grey50",
+                       alpha = .9, binwidth = .025)+
+            geom_histogram(aes(x=EstimatedReturn, fill = "estimated"),
+                       color="grey50", alpha = .7, binwidth = .025) +
+            geom_vline(x=0,linetype="dashed", colour = "red") + 
+            scale_x_continuous(breaks=seq(-1,1,.05), 
+                labels = function(x){paste(round(x*100,2),"%",sep='')}) +
+            scale_fill_manual("Returns",values=c("green", "light blue")) + 
+            xlab("Lender Return")+ 
+            ylab("Density of Return Percentages") +
+            ggtitle("Actual vs. Estimated Lender Return Rates") + 
+            theme(axis.text.x=element_text(angle = 45, hjust = 1),
+                legend.key.size = unit(0.5,'cm'),
+                legend.text = element_text(size=rel(.75))) +
+            coord_flip(xlim=c(-1,1)) + 
+            facet_grid(~Loan_Outcome, margin=T)
+    return(plot)
+}
+print("Distribution of or lender returns by estimated and actual for loan outcomes")
+estimatedVsActualReturnsDensity(df)
+```
+
+*We can see that estimated returns follow a normal distribution where as actual results are more of a poisson distribution. Similar to the single variate plots for unsuccessful loans, when the loans fail they fail badly (loss of most if not all of an investors capital) for the most part.* 
+
+```{r echo=FALSE, warning=FALSE,message=FALSE, comment=NA}
+debtRatioVsProsperRating <- function(ProsperDataFrame){
+    
+    plot <- ggplot(ProsperDataFrame, 
+                aes(x = ProsperRating, y = DebtToIncomeRatio,na.rm = TRUE)) + 
+        coord_cartesian(,ylim= c(
+            0,quantile(ProsperDataFrame$payment_to_monthly_income,.99))) +
+        scale_y_continuous(breaks = seq(
+            0,quantile(ProsperDataFrame$payment_to_monthly_income,.99),.025)) + 
+        geom_boxplot(aes(fill = Prosper_User_Status)) + 
+        xlab("Prosper Rating") + 
+        ylab("Debt to Income Ratio") + 
+        ggtitle("Distribution of Debt ratio to Prosper Rating") +
+        facet_grid(~Loan_Outcome)
+    return(plot)
+}
+print("Boxplot analysis of debt-to-income ratios for first time and prior borrowers across loan outcomes")
+debtRatioVsProsperRating(df)
+```
+
+*There is a clear difference between successful loans and unsuccesful loans whereby unsuccessuful loans have higher debt-to-income ratios across all of the Prosper ratings. What is more interesting is the difference between first time and previous borrowers. for the most part previous borrowers have higher debt to income ratios.*    
+
+```{r echo = FALSE, results='hide'}
+#table(Prosper_Post09_Subset$Prosper_User_Status, 
+#Prosper_Post09_Subset$Loan_Outcome)
+#margin.table(table(Prosper_Post09_Subset[,c("Prosper_User_Status",
+#"Loan_Outcome")]),margin=1)
+
+## The following tables are graphed in the following mosiac plots, these
+## are easier to read the long lists of number. This report is long 
+## enough without adding these values to the final report.
+prop.table(table(Prosper_Post09_Subset[,
+                        c("Prosper_User_Status","Loan_Outcome")]),2)
+prop.table(table(Prosper_Post09_Subset[,
+                        c("ProsperRating","Loan_Outcome")]),1)
+prop.table(table(Prosper_Post09_Subset[,
+                        c("ProsperRating","Loan_Outcome")]),2)
+prop.table(table(Prosper_Post09_Subset[,
+                        c("credit_range","Loan_Outcome")]),1)
+prop.table(table(Prosper_Post09_Subset[,
+                        c("credit_range","Loan_Outcome")]),2)
+
+```
+
+```{r echo = FALSE, comment=NA}
+investorsProsperRatingLoanOutcome <- function(ProsperDataFrame){
+    
+    plot <- ggplot(ProsperDataFrame, 
+                aes(x = ProsperRating, y = Investors)) +
+        coord_cartesian(ylim = c(
+            0,quantile(ProsperDataFrame$Investors, .99))) + 
+        scale_y_continuous(breaks= seq(
+            0,quantile(ProsperDataFrame$Investors, .99),15)) + 
+        geom_boxplot(aes(fill = Prosper_User_Status)) + 
+        xlab("Prosper Rating") + 
+        ylab("Number of Investors") +  
+        ggtitle("Distribution of Investors by Prosper Rating and Loan Outcome") +
+        facet_grid(~Loan_Outcome, margin = T)
+    return(plot)
+}
+print("Boxplot of Investors by Prosper rating, loan outcome and user status")
+investorsProsperRatingLoanOutcome(df)
+```
+
+*The main difference I see here is between first time and prior borrowers. Although not extreme there is a difference between first time and previous borrowers whereby the I.Q.Rs of first time borrowers spans a greater range then prior borrowers and tends to have more investor on average. It also look like successful Loans have higher numbers of Investors accross the board, reasonable if we assume most investors dislike risk.*    
+
+```{r echo=FALSE, comment=NA}
+homeowner <- function(ProsperDataFrame) {
+
+    plot <- ggplot(ProsperDataFrame, 
+                aes(x=ProsperRating, y = ..count../sum(..count..), 
+                    group=1)) + 
+        geom_bar(aes(fill=factor(..x..))) + 
+        xlab("Prosper Rating") + 
+        ylab("Density of Prosper Rating")+ 
+        ggtitle("Homeowner Status with respect to Prosper Rating and
+                Loan Outcome") + 
+        guides(fill = F)+
+        facet_wrap(IsBorrowerHomeowner~Loan_Outcome, scales = "free_y")
+    return(plot)
+}
+print("Status of homeowner vs Loan outcome")
+homeowner(df)
+
+```
+
+*We can see higher Prosper ratings and successful loans for homeowners vs. non-homeowners.* 
+
+###(Final Plot 1)    
+```{r echo=FALSE, comment=NA, fig.height=18, fig.width=16}
+lenderReturn <- function(ProsperDataFrame){
+    
+    plot1 <- ggplot(subset(ProsperDataFrame, credit_range %in% 
+                c("640-659","660-679","680-699","700-719","720-739",
+                  "740-759","760-779","780-799","800-819","820-839",
+                  "840-859","860-879","880-899")), 
+                aes(x=credit_range, y = lender_return, na.omit=T)) + 
+            geom_violin(aes(x=credit_range, y=lender_return,fill = "all"),
+                    colour = "grey50", alpha = .3, outlier.size = 1,
+                    outlier.shape = 2, outlier.colour = "grey50",
+                    trim=F) +
+            geom_violin(aes(fill = Prosper_User_Status), alpha = .7,
+                         trim=F) +
+            coord_cartesian(ylim=c(-1,1)) + 
+            scale_y_continuous(breaks=seq(-1,1,.05), 
+                labels = function(x){return(paste(round(x*100,2),"%",sep=''))}) + 
+            scale_fill_brewer("Prosper User Status",type = "seq", 
+                palette = "Set1") +
+            theme_bw()+
+            theme(axis.text.x=element_text(angle = 75, hjust = 1),
+                legend.key.size = unit(0.5,'cm'), 
+                legend.text = element_text(size=rel(.75)),
+                panel.grid.major.x=element_blank()) +
+            geom_hline(y=0,linetype="dashed", colour = "red") +
+            ylab("Lender Return") + 
+            xlab("Credit Range") + 
+            ggtitle("Lender return based on credit range and user status") #+ 
+    
+
+    plot2 <- ggplot(ProsperDataFrame, 
+                aes(x=ProsperRating, y = lender_return, na.omit=T)) + 
+            geom_violin(aes(x=ProsperRating, y=lender_return,fill = "all"),
+                colour = "grey50", alpha = .4, outlier.size = 1, 
+                outlier.shape = 2, outlier.colour = "grey50",
+                trim=T) +
+            geom_violin(aes(fill = Prosper_User_Status), alpha = .7,
+                        trim=T) +
+            coord_cartesian(ylim = c(-1,1)) + 
+            scale_y_continuous(breaks=seq(-1,1,.05), 
+            labels = function(x){return(paste(round(x*100,2),"%",sep=''))}) + 
+            theme_bw() + 
+            theme(axis.text.x=element_text(angle = 75, hjust = 1),
+                legend.key.size = unit(0.5,'cm'),
+                legend.text = element_text(size=rel(.75)),
+                panel.grid.major.x=element_blank()) +
+            geom_hline(y=0,linetype="dashed", colour = "red") +
+            scale_fill_brewer("Prosper User Status",type = "seq", 
+                palette = "Set1") +
+            xlab("Prosper Rating") + 
+            ylab("Lender Return") + 
+            ggtitle("Lender return based on Prosper rating and user status") #+
+    
+    return(grid.arrange(plot1,plot2,ncol=1))
+}
+print("Lender Return by Credit Range, Prosper Rating and User Status")
+lenderReturn(df)
+```
+
+*For a majority of loan lisitings many of the credit ranges for prior borrowers have a slightly higher concentration in positive return territory (seen by the fatter violin shapes ). This appears to be the case because the ranges of outcomes are less extreme then for first time borrowers. There are a few outliers even in the highest of credit ranges, however for the most part we can see fewer and fewer failed loans (lender return < 0%) the higher up the credit range we walk (fatter and fatter distributions in the positive territory). For all the credit ranges the majority of listing are in positive lender return territory.*
+*To compare this to Prosper's proprietary rating system we see a lot of similarities. Again for the lower rating 1-3(high risk) we see distributions that are narrower and span the positive and negative return divide. For Prosper ratings higher then 3 we see mostly positive returns. I believe this reflects (and we can this see in the correlation analysis) that the Prosper rating does a slightly better job of determining when a borrower is going to be successful and when they are likely going to be unsuccessful. The differences between the first time and prior borrowers is not as clearly defined when compared to the Prosper ratings vs. the credit range. It looks like that for all Prosper ratings the density distributions are slightly more uniform. This could reflect more accuracy in terms of Prosper ratings. It appears that investors at Prosper do a good job of selecting those prior borrowers with low Prosper ratings who will actually be successful. We can see that for Prosper ratings of 1 for previous borrowers the fatter part of the distirbution falls generously into the territory of positive returns.*     
+
+###(Final plot 2)
+```{r echo=FALSE, warning=FALSE,message=FALSE, comment=NA}
+
+print("Mosiac plots for Prosper rating and loan outcome and credit range and loan outcome ")
+ggMMplot(df$ProsperRating, 
+         df$Loan_Outcome, "Prosper Rating", 
+         "Loan Outcome","Frequency distribution of nested variables")
+ggMMplot(df$credit_range, 
+         df$Loan_Outcome, "Credit Range", 
+         "Loan Outcome", "Frequency distribution of nested variables")
+
+```
+
+*The previous two plots are mosiac plots, they represent the proportions of two variables one nested inside the other. In the first plot I see a majority of current borrowers with Prospers ratings 4 and above. We can see higher failure rates for high risk borrowers (low rating) however there are a lot of successful loans compared to failures across all of the Prosper ratings. For the credit rating we see similar results simply spread out over more factor levels. It might be the case that there is a more uniform distribution of unsuccessful loans across all of the credit ranges compared to the Prosper rating but it is rather hard to tell. It is however clear that in terms of predicting the binary classification of successful and unsuccessful loans Prosper rating are not significantly superior to credit ranges. We're I putting my own money on the line and I only had the options of seeing one metric of risk I would choose the Prosper score. It is the case that the least distinction between credit ranges occurs in the the most common ranges of credit score, as a result I believe that we can achieve a little more certainty with the Prosper rating. This is good thing in terms of proving the viability of Prospers risk measurements.*      
+
+###(Final Plot 3)
+```{r echo=FALSE, comment=NA}
+investorsByReturns <- function(ProsperDataFrame){
+    
+    plot <- ggplot(ProsperDataFrame, 
+                aes(x=Investors, y = lender_return, size=LoanOriginalAmount)) + 
+    coord_cartesian(ylim = c(-1,1), xlim=c(
+        0,max(ProsperDataFrame$Investors))) +
+    annotate("rect", xmin = 0, xmax=Inf, ymin=-1, ymax=0, alpha =.05, 
+             fill="red") + 
+    annotate("rect", xmin = 0, xmax=Inf, ymin=0, ymax=1, alpha =.05, 
+             fill="blue") +
+    geom_point(aes(colour = ProsperRating), alpha = .7) +
+    scale_y_continuous(breaks=seq(-1,1,.05), 
+            labels = function(x){return(paste(round(x*100,2),"%",sep=''))}) +
+    scale_x_continuous(breaks=seq(0,1000,25)) +
+    theme_bw() + 
+    theme(axis.text.x=element_text(angle = 45)) +
+    xlab("Number of Investors") + 
+    ylab("Lender Return") + 
+    ggtitle("Distribution of Investors by lender return and Prosper rating")
+    return(plot)
+}
+print("Scatter plot of investor by lender return and Prosper rating")
+investorsByReturns(df)
+```
+
+*We can see that for the most part lower return loans that are also lower risk (higher Prosper Rating) have more investors. For those loans that have failed (i.e. negative return) we see a trend of lower Prosper ratings but little differences in the number of investors with perhaps the only trend being less investors on average in loans that are unsuccessful. Recall that in the analysis of the univariate section we found that the most common number of investor is actually 1. I would have suspected that most higher risk loans would have a larger number of investors as this would seem a natural free market method to protect against loss when you are not able buy insurance against it. However it looks like the size of the loan is a much larger factor in determining number of investors not only that but the loan size may even provide some explaination of Prosper ratings and lender return. The greatest returns are seen by those brave few who invests in high risk borrowers with smaller loans.*      
+
+##Part 2 Analysis -- Mulit-variate and Final Plot Analysis   
+###Relationships observed in this part of the investigation. How did my features of interest vary with other features in the dataset?
+I found clear relationships between Prosper ratings and credit ranges. Furthermore and fortunately for Prosper investor there is also a relationship to be found between Prosper ratings and loan outcomes, both in a broad sense, did the loan succeed or fail and in a more minute way such as was the return minimal or larger. There are also relationships to be found between the number of investors and the return seen by the investors. We also see that the Prosper rating has a relationship to the number of investors. Loan outcomes have some relationship to homeowner status, and throughout all of my variables of interest the difference between first time and prior borrowers was noticeable. There are correlations to be found among estimated and actual return although not as much as I might have guessed. When looking at lender returns we can see that for lower positive returns we see higher Prosper ratings (less risk), higher credit_ranges(less risk), homeowner status, lower debt to income ratios and a larger number of investor per listing. Conversely we see higher return and most negative returns associated with lower Prosper ratings (high risk) and credit ranges (although not as clearly as Prosper ratings), lower number of investors and higher debt to income. 
+
+### What were the relationships found?
+The strongest relationship found was between my loan outcome and lender return, but these two are directly related and therefore not very interesting when looking at correlations. The second strongest relationship is between Prosper Rating and Estimated Return, again these should be closely tied together as one is suppose to depend on the other. There is a relationship to be found, although not a strong one, between Prosper rating and loan outcome. There's a much stronger relationship between credit range and Prosper Rating, which is not to surprising after reviewing the above charts. We can find a relatively strong relationship between Prosper user status and credit ranges. In regards to several of my features of interest, lender return, Prosper rating and credit ranges we see weak correlations between these variables and income ranges.            
+
+###Model with my dataset. The strengths and limitations of my model.
+```{r}
+## The following supervised classification model is only a quick and simple prototype to look at the general importance of the different variables. A more rigorous and likely superior model could be generated with cross-validation and careful perturbation of the hyper-parameters (i.e. nodesize, mtry and maxnodes). This model is not meant to be a concentrated effort in contructing an optimized supervised learning model to predict successful and unsuccessful loans, rather it is designed to give a rough idea of the importance of the variables in the data set that are used in pursuit of that goal. Furthermore, If the goal was to apply a supervised learning model to the Prosper data I would likely build a regression model and attempt to predict actual lender returns within some small measure of error. In the case of predicting actual returns the importance of the variables may change.  
+
+
+## The following random Forest classification model was run using Breiman and Cutler's excellent Random Forests for Classification and Regression r package. A quick review of the packages documentations [https://cran.r-project.org/web/packages/randomForest/randomForest.pdf] indicates that much of the power of this packages remains under-utilized and unused in the following model. As explained above the models purpose was to build a quick prototype and analysis the resulting variable importance not to build the optimal classfication model. 
+
+classificationModelPrep <- function(ProsperDataFrame){
+#    
+#   Input: ProsperDataFrame
+#
+#   Output: Prosper Data Frame where key, listing date, and lender return
+#   features have been removed. In addition the Data Frame will be subsetted
+#   by the outcome variable Loan_Outcome so that only those loans that have 
+#   concluded will be used as the outcome variable. Successful and Unsuccessful.
+#   Finally for the purposes of predicting current loans we will drop those 
+#   variables that act as progress reports for the loans. Meaning those 
+#   variables that an investor would not have data for when looking into 
+#   potential borrowers who have not borrowed before. This means dropping 
+#   Loan Current Days Delinquent which is data only acquired after a loan 
+#   has been given.
+#
+    Prosper_DataFrame_Model <- subset(Prosper_Post09_Subset, 
+                    select = -c(ListingKey,ListingDate,BorrowerState, 
+                                lender_return, LoanCurrentDaysDelinquent)) 
+    
+    Prosper_DataFrame_Model_subset <- subset(Prosper_DataFrame_Model, 
+                    Loan_Outcome %in% c("Successful Loan", "Unsuccessful Loan"), 
+                    drop = T)
+    # remove the unused levels from the factor variable Loan_Outcome
+    Prosper_DataFrame_Model_subset <- droplevels(Prosper_DataFrame_Model_subset)
+  
+    return(Prosper_DataFrame_Model_subset)
+}
+
+## Remove remaining NA's from the dataFrame for random forest classification
+Prosper_Data_Frame <- na.omit(classificationModelPrep(Prosper_Post09_Subset))
+train_test <- createDataPartition(Prosper_Data_Frame$Loan_Outcome, 
+                                  times = 1, p = .7, list=F)
+
+# Split data into training and test set, I will avoid cross-validation in this 
+# case to keep the run time down on the model training.
+train_data <- Prosper_Data_Frame[train_test[,1],]
+test_data <- Prosper_Data_Frame[-train_test[,1], ]
+
+train_data_x <- subset(train_data, select =-c(Loan_Outcome))
+train_data_y <- train_data$Loan_Outcome
+
+test_data_x <- subset(test_data, select =-c(Loan_Outcome))
+test_data_y <- test_data$Loan_Outcome
+
+Prosper_train_clf <- tuneRF(x = train_data_x, y = train_data_y,
+                                stepFactor =2, improve =.05,
+                                doBest=TRUE, plot=F,
+                                xtest = test_data_x,
+                                ytest = test_data_y, ntree = 750,
+                                importance = T, na.action = na.omit)
+
+Prosper_train_clf
+
+importance(Prosper_train_clf)
+varImpPlot(Prosper_train_clf)
+```
+
+##Summary  
+The initial Prosper data set contained a large quantity of information regarding its users and after deciding I would approach this data-set as if I were a potential investor investigating the Prosper marketplace I set to work examining the key variables I felt most relevant to that archetype. After deciding on a general goal of analyzing the efficacy of Prospers peer-to-peer marketplace on the bases of whether or not the creditworthiness of its users could be adequately assessed and accounted for, I began munging the data set. After looking over the variables I removed all those loan listing pre-2009. Reflecting that 81 variables is not conducive to brief exploratory analysis I dropped many variables that either contained information I was not interesting in exploring or whose data was a part of another variable. Deciding to focus on the outcome of the loans, chiefly whether it was successful or not and desiring to see the actual return rate investors received I created several new variables to capture this goal, loan outcome and lender return.   
+
+Reducing my variables down to 38 I proceeded to create 'uni-variate' plots of most of these variables, with the understanding that I would not be exploring many of them any further. As I was not intending to explore the variables further but still being interested in understanding how they relate to my groups and goal, I introduced my new group variables to the plots through the use of faceting. This means there was more then one variable in my resulting plots, although I did include a true uni-variate plot in most of facet grids. I found that by faceting I shed a lot more light the variables relations to my goal then had I simply looked at the collective. Many of these plots confirmed that the variable had some relationship to my groups. It quickly become clear however that very large visual differences were not going to be seen between any of the variables and my groups. This makes sense, if it were the case that a few key variables explained all of a borrowers credit worthiness there would not be much risk in lending nor art in deciding which variables in a borrowers credit history accurately predict creditworthiness. Even though most of the uni-variate plots contained variables that were not going to be explored further I felt it would be valuable to see these variables and how they changed based on my groups as their origins are easier to understand then a credit score or Prosper rating. 
+
+Wrapping up the faceted single variable plots I shifted my focus down to a smaller set of variables which were explored in more detail. Running a correlation analysis on the reduced set of features revealed a mix bag of correlations. Some features such as debt to income ratio and lender return share almost no correlation which I found very interesting as their does appear to be a relationship between debt to income ratio and Prosper rating. Other feature correlations such as Prosper user status are related to Loan outcome, suggesting that knowledge of prior Propser loan performance is a superior metric than most first time borrower metrics. In regards to my features of interest the variables most strongly correlated with lender return and loan outcome are Prosper rating, estimated return, Prosper user status and Income range. Following the correlation analysis I plotted my features of interest along with several other features that vary noticeably with my loan outcomes and lender return. For both the credit range and Prosper rating we see correlation with lender return. We also find in the mosaic plots a clear correlation between the Prosper rating and credit range variables themselves. Continuing I found a trend whereby lower Prosper ratings and credit ranges are more likely to be associated with failed loans (negative returns) and if we look at the variables of importance in the random forest classification model we can see this numerically. 
+
+While the model is fairly basic it suggests that estimated return plays a large part in predicting loan outcomes. The Prosper rating and credit range both play a part both in predicting successful loans but also in predicting unsuccessful loans. Ultimately the variables which offer the most information in terms of accurate predictions are estimated return Borrower APR, credit range, payment to monthly income and debt to income ratios. It is interesting to note that the debt-to-income ratio is important to the model accuracy but the correlation analysis did not find a strong correlation between loan outcomes and debt-to-income ratios.
+
+#Reflections and Issues
+The Propser data set offered a unique look into its borrowers and the platform itself is certainly unconventional. After briefly exploring the data I would feel much more comfortable about investing my own money in this marketplace. As with any lending transaction there certainly exist some risk that you will lose nearly all your money, however loans that typically fail this badly are broadly ranked as high risk. The real science to achieving success as an investor with Prosper would be picking those loans rated as higher risk but still succeed with regularity. Prosper perhaps to protect its investors and possibly to generate more revenue appear to be conservative in their rating methodology, at least as it compares to standard credit ranges. Clearly we do not want to see any failed loans, but If we do we would like to see them with very high risk ratings. There is no perfect marketplace of loans were getting paid back is a certainty and certainly in Prospers marketplace the individual borrowers will likely have a harder time weathering lost capital then say a larger bank. That being said I think that for those investors willing to except a little risk the Prosper marketplace provides a viable platform for investing your money especially in higher rated loans. 
+
+Working with so many factor variables constrained some of my plotting options and lead to my use some less statistically rigorous analysis techniques to find correlations. Several of my variables were abandoned as a result of likely containing to many lurking variables. I personally believe that a more robust analysis of Prosper loan listings could be perform with a longer time frame and I would enjoy an opportunity to listings over a longer time frame. Much of this analysis relies on the belief that the particular quarter this data was drawn from is representative of all Prosper loan listings. This assumption may be a bit of a stretch. I'd like to to see if I couldn't construct a model that would predict actual lender return and a percentage, furthermore it would be interesting to see if I could optimize my classification model to improve the accuracy above 90%. It should be noted that my current models importance measurements may be biased ([Understanding variable importances in forests of randomized trees](http://papers.nips.cc/paper/4928-understanding-variable-importances-in-forests-of-randomized-trees.pdf)). This might explain some of the disparity between my correlation analysis and variable importance report. I had to do a fair bit of searching for methods of displaying some of the data with really larger ranges in scale of data. Further I had to learn how to manually generate some color when using more than 12 factors because there is apparently a limit to what ggplot can automatically handle when coloring on another variable. I also found it neccessary to cut out some of the data inlcuded in a few of the variables that may have been outliers or real data, regardless these data points prevented me from seeing the meat of the data when plotted. The biggest challenge in this analysis may simply have been the size of the dataset and having to cut out some many variables and possible realtionships in an attempt to reach even this not insignificant length. 
