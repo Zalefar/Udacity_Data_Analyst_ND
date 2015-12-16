@@ -27,7 +27,7 @@ Traditionally credit bureaus, also known as credit reporting agencies collect va
 
 Typically credit bureaus collect personal information related to an individuals credit worthiness by sourcing it from data furnishers, e.g. creditors, lenders, utilities, collection agencies, and courts. This information is then made available to those performing risk assessment through a credit background search. The Prosper data, anonymized but made available through an API provides us with an opportunity to explore the some of the data behind the 'science' of quantifying borrowers 'creditworthiness'.    
 
-To begin I installed several packages and set the R-libraries required for the rest of this analysis. I then review the whole data-set, simplify, combine, and reduced many of the variables before venturing into the actual plotting and analysis. After finishing the preparation of the data I subdivide it into different groups to represent a 'range' of prosper users. Next I proceed to graph the remaining variables in uni-variate plots faceted on my groups. I review those graphs after which I narrow down my analysis to just a few key variables I hope to use to capture the essence of my question. Then I move to plotting my multi-variate charts and follow up with descriptions of the outcomes and my general thoughts on how the data reviewed thus far relates to and describes my goal. Next a create a simply and fast supervised classification model to predict whether a loan will be successful or not, and briefly review which variables contributed the most to this model. I finish with an overall summary of my analysis and end with some reflections and conclusions on the analysis.  
+To begin I installed several packages and set the R-libraries required for the rest of this analysis. I then review the whole data-set, simplify, combine, and reduced many of the variables before venturing into the actual plotting and analysis. After finishing the preparation of the data I subdivide it into different groups to represent a 'range' of prosper users. Next I proceed to graph the remaining variables in uni-variate plots faceted on my groups. I review those graphs after which I narrow down my analysis to just a few key variables I hope to use to capture the essence of my question. Then I move to plotting my multi-variate charts and Final plots which I follow up with a description of the outcomes and my general thoughts on how the data reviewed thus far relates to and describes my goal. Next I create a fast and dirty supervised classification model to predict whether a loan will be successful or not, and briefly review which variables contributed the most to this model. I finish with an overall summary of my analysis and end with some reflections and conclusions on the analysis.  
 
 *********         
 ##Dataset Preparation     
@@ -41,7 +41,7 @@ setwd("/Users/Zach/Desktop/Udacity_DataAnalyst_ND/Project_3/")
 # in my analysis.
 
 ## The following packages were neccessary for my analysis, 
-## Uncomment to load for the fist time, if neccesary.
+## Uncomment to load for the fist time.
 #install.packages("rmarkdown")
 #install.packages("maps")
 #install.packages("mapdata")
@@ -154,7 +154,7 @@ convertDates <- function(ProsperData_Post_09) {
 ProsperData_Post_09 = convertDates(ProsperData_Post_09)
 ```
 
-In an effort to focus attention on a reduced number of variables I removed those variables which I felt did not provide analytical value that I was interested in or seemed redundant or were summarized in other features. I also removed the unique key values for the members, the loans themselves, and the groups, preferring instead to use  the loan listing key as my 'primary key'. 
+In an effort to focus attention on a smaller number of variables I removed those variables which I felt did not provide value that I was interested in or seemed redundant or were summarized in other features. I also removed the unique key values for the members, the loans themselves, and the groups, preferring instead to use  the loan listing key as my 'primary key'. 
 ```{r, echo=TRUE, comment=NA}
 ## Drop the following variables; 
 # -ListingNumber (use ListingKey instead), 
@@ -174,7 +174,7 @@ In an effort to focus attention on a reduced number of variables I removed those
 # -EmploymentStatus (This variable is caputured in the 
 # EmploymentStatusDuration and Annual Income), 
 # -OpenRevolvingAccounts (I will use OpenrevolvingMonthlyPayments as 
-# proxy to represent the explanation value of this variable), 
+# proxy of this variable), 
 # -TotalInquiries (More focused on inquiries for the last 6 months not a
 # persons lifetime), 
 # -PublicRecordsLast10Years (Again more focused in the Public 
@@ -182,7 +182,7 @@ In an effort to focus attention on a reduced number of variables I removed those
 # -TotalCreditLinespast7years (A quick and dirty overiew of this data
 # suggests a standard piosson distr. Given the large number of variables
 # I will drop this variable and simply rely on current credit lines to
-# capture whatever information existed in this variable)
+# capture the key information in this variable)
 # -OpenCreditLines (I will rely on a combination of current credit lines
 # and information of credit load, monthly credit payments, and debt ratio
 # to explain the important essence of this variable.)
@@ -198,16 +198,16 @@ In an effort to focus attention on a reduced number of variables I removed those
 # variables I will drop this variable, This is interesting but will be
 # sacrificed in pursuit of narrowing my focus), 
 # -LoanFirstDefaultedCycleNumber (Information is already captured by the
-# loan Status variable the only other value is in finding patterns in how
-# long before defaulted. This is not a direction I wish to take in this
+# loan Status variable, the other value It may have is in finding patterns in how
+# long before default. This is not a direction I wish to take in this
 # analysis),
-# -LoanOriginationDate (I believe that most important value this variable
+# -LoanOriginationDate (I believe that the most important value this variable
 # adds is in determining the age of the loan and LoanMonthsSinceOrigination
 # already captures this, unless of course we are interested in any lurking
 # effects associated with the loan origination date.),
 # -LoanOriginationQuarter (Any trends gleened from this would be suspect
-# for lurking variables associated with context of the timeframe, again this is not a direction I wish to take 
-# with this analysis),
+# for lurking variables associated with context of the time, this is not a direction 
+# I wish to take with this analysis),
 # -MemberKey (Already have unique listing key I will forego this key),
 # -ClosedDate (This information is available in less detail in the
 # LoanStatus. The additional value it adds such as the average length of
@@ -483,9 +483,9 @@ temp_df1 <- mutate(temp_df1, sign = lender_return >= 0.0)
 
 ##Part 1 - Univariate plots    
 
-Utilizing ggplot I graph most of the variables remaining at this point. I will facet on my groups, technically this is introducing another variable so it is not truly uni-variate. By faceting I hope to highlight the variables containing interesting explanatory power as they relate to my groups. I will not continue exploring all of the variables past this point in my analysis so I wish to briefly explore their relevancy to my groups and ultimately how they may influence a borrowers 'creditworthiness'. 
+Utilizing ggplot I graph most of the variables remaining at this point. I will facet on my groups, technically this is introducing another variable so it is not truly uni-variate(although one of the facets will contain all the data). By faceting I hope to highlight the variables containing interesting explanatory power as they relate to my groups. I will not continue exploring many of these variables past this point in my analysis so I wish to briefly explore their relevancy to my groups and ultimately how they may influence a borrowers 'creditworthiness'. 
 
-I apply a pair-wise Mann Whitney U test (sometimes I use a Dunn test (Kruskal-Wallis multiple comparisons)) to each of my variables to analytically determine significant differences between my groups. I use a non-parametric test to make as few assumptions as possible about the distributions. The use of the analytical tests is to back up my assessments of the graphs several of whose distributions look very similar across my facets. In addition I was looking to add some statistical rigor to my assessments. I generate a couple of ad-hoc functions to perform graph specific transformations and alteration in order to make more sensible graphs for several of the variables.  
+I apply a pair-wise Mann Whitney U test (sometimes I use a Dunn test (Kruskal-Wallis multiple comparisons)) to each of my variables to analytically determine significant differences between my groups. I use these tests to make as few assumptions as possible about the distributions and because many of my variables are categorical. The use of the analytical tests is to back up my assessments of the graphs several of whose distributions look very similar across my facets. In addition I was looking to add some statistical rigor to my assessments. I generate a couple of ad-hoc functions to perform graph specific transformations and alteration in order to make more sensible graphs for several of the variables but these few alterations to the dataset are temporary and graph specific.  
 
 ```{r}
 ## Reorder or re-level factor variables for more sensible graph labeling
@@ -661,7 +661,7 @@ print("Loan Term Duration")
 univariateTermPlot(Prosper_Post09_Subset)
 ```
 
-*Plot suggests differences between my groups in loan term durations. There appears to be fewer past due payments on 12 month loans ( for both new and returing borrowers). There is an increased number of past due loanees with 60 month loans. The overall trend for Prosper loans is 36 months, although it does appear that previous Prosper borrowers are more likely to apply for 12 month loans. As the most popular loan length is 36 months it is not to suprising that most successful loans are 36 months and most unsuccessful loan are also 36 months. Interestingly there are smaller proportions of current borrowers requesting 12 month loans.*        
+*Plot suggests differences between my groups in loan term durations. There appears to be fewer past due payments on 12 month loans ( for both new and returing borrowers). There is an increased number of past due loanees with 60 month loans. The overall trend for Prosper loans is 36 months, although it does appear that previous Prosper borrowers are more likely to apply for 12 month loans. As the most popular loan length is 36 months it is not to suprising that most successful loans are 36 months and most unsuccessful loan are also 36 months. there is a relatively high success rate for 12 month long loans. the decrease in successful loans at 60 months could simply a result of their timeframes and the number of them concluding in this quarter. Would recommend being very careful about drawing strong inferences from this variable.*        
 
 *******       
 ```{r echo = FALSE, comment=NA, fig.height=6,fig.width=8}
@@ -681,7 +681,7 @@ print("Listing Date")
 univariateListingDate(Prosper_Post09_Subset)
 ```
 
-*While it is clear that differences exist between my groups it is not clear that it is anything more then simply the result of time. Shifts in distribution make sense intuitively if we recall that my groups themselves are often time dependent. No doubt useful information exists here, but I am not prepared to explore whether the loan origination date is a vaild indicator of a borrowers 'creditworthiness'. Especially not with snapshot data, this information would be more interesting in a longitudinal study of Prosper loan listings.*    
+*While it is clear that differences exist between my groups it is not clear that it is anything more then simply the result of time. Shifts in distribution make sense intuitively if we recall that my groups themselves are often time dependent. No doubt useful information exists here, but I am not prepared to explore whether the loan origination date is a vaild indicator of a borrowers 'creditworthiness'. Especially not with snapshot data, this information would be more interesting in a study of Prosper loan listings over a much longer time frame.*    
 
 ******
 ```{r echo = FALSE, comment=NA}
@@ -712,7 +712,7 @@ pairwise.wilcox.test(Prosper_Post09_Subset$BorrowerAPR,
     Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
 ```
 
-*Some interesting trends occurring here. On average previous borrowers are not subject to as high an APR rate, why is that?. It also appears that borrowers who are past due or unsuccessful in paying back there loans are subject to a higher interest on average. This might indicate that Prosper's method of measuring risk (and subsequently discounting it) contains some efficacy. It is interesting to note the number of borrowers with an APR as high as ~35% accross all groups. This really high percetage of ~35% for Borrowers APR applies only to first time borrowers. clearly we would expect riskier borrowers to pay higher interest rates but why the uneven distribution and heavy skew to one really high APR?*      
+*Some interesting trends occurring here. On average previous borrowers are not subject to as high an APR rate, why is that? a change in policy?. It also appears that borrowers who are past due or unsuccessful in paying back there loans are subject to a higher interest on average. This likely indicates that Prosper's method of measuring risk (and subsequently discounting it) contains some efficacy. It is interesting to note the number of borrowers with an APR as high as ~35% accross all groups. This really high percetage of ~35% for Borrowers APR applies only to first time borrowers. clearly we would expect riskier borrowers to pay higher interest rates but why the uneven distribution and heavy skew to one really high APR?*      
 
 *******     
 ```{r echo = FALSE, comment=NA}
@@ -745,7 +745,7 @@ pairwise.wilcox.test(Prosper_Post09_Subset$EstimatedReturn,
 ```
 
 
-*There is a trend to higher estimated returns associated with loanees past due or who have failed on their loans (i.e. higher risk). It is interesting to note that the very high borrower's APR of ~35% for a large percentage of borrowers is not reflected (at least not yet) with as much consistency here in lenders estimated return rates. Additionally it does appear that for previous borrowers there is a slight shift towards lower return rates accross all loan groups. Are previous borrower's estimated return rates more accurate given Prosper's prior knowledge of borrower's performance on previous Prosper loans?*   
+*There is a trend of higher estimated returns associated with loanees past due or who have failed on their loans (i.e. higher risk). It is interesting to note that the very high borrower's APR of ~35% for a large percentage of borrowers is not reflected (at least not yet) with as much consistency here in lenders estimated return rates. Additionally it does appear that for previous borrowers there is a slight shift towards lower return rates accross all loan groups. Are previous borrower's estimated return rates more accurate given Prosper's prior knowledge of borrower's performance on previous Prosper loans?*   
 
 ******
 ```{r echo = FALSE, comment=NA}
@@ -768,7 +768,7 @@ print("Prosper Proprietary Rating (Numeric)")
 univariateProsperRating(Prosper_Post09_Subset)
 ```
 
-*There is a clear trend in first time borrowers of lower ratings for past due and unsuccessful loans (again this is good news for Prosper's rating system). Additionally it appears that for successuful loans previous borrowers have higher ratings. With actual data on previous Prosper users' loan performance, Prosper's scoring system looks to be more accurate in ranking riskiness. This suggests that Prosper's rating system for returning user is a slighter better estimator then for first time users.*     
+*There is a clear trend in first time borrowers of lower ratings for past due and unsuccessful loans (again this is good news for Prosper's rating system). Additionally it appears that for successuful loans previous borrowers have higher ratings. With actual data on previous Prosper users' loan performance, Prosper's scoring system looks to be more accurate in ranking riskiness. This might indicate that Prosper's rating system for returning user is a slighter better estimator then for first time users.*     
 
 ***** 
 ```{r echo = FALSE, comment=NA}
@@ -809,7 +809,12 @@ dunnTest(x=as.numeric(Prosper_Post09_Subset$ListingCategory),
 
 ```
 
-*There does appear to be significant differences between my loan outcomes. Overall it looks like most loans are requested for debt consolidation. Some of the clearest differences are actually between unsuccessful loans and successful loans. There are more unsuccessful loans proportionally for business, Green Loans, House Expenses and large purchases.*   
+*Overall it looks like most loans are requested for debt consolidation. Some of the clearest differences are actually between unsuccessful loans and successful loans. There are more unsuccessful loans proportionally for business, Green Loans, House Expenses and large purchases. Digging into this variable some more would be interesting but probably not a direction I will take in this analysis.*
+
+```{r echo=FALSE, results='hide'}
+prop.table(table(Prosper_Post09_Subset$ListingCategory, Prosper_Post09_Subset$ProsperRating), margin=2)
+```
+
 
 *******  
 ```{r echo = FALSE, comment=NA}
@@ -841,7 +846,7 @@ pairwise.wilcox.test(Prosper_Post09_Subset$EmploymentDurationMonths,
 
 ```
 
-*After running an analytical test with error rate adjusted using "holm" method, there appears to be a statistically significant difference between the distributions of some of the loan outcomes and the prosper user statuses. Current Prosper borrowers have a longer work history on average then previous borrowers. The differences are not visually extreme but this variable may hold some explanatory power in understanding the attributes of 'creditworthiness' of borrowers.*      
+*After running an analytical test with error rate adjusted using "holm" method, there appears to be a statistically significant difference between the distributions of some of the loan outcomes and the prosper user statuses. Current Prosper borrowers have a longer work history on average then previous borrowers. The differences are not visually extreme but this variable may hold some explanatory power in understanding the attributes of 'creditworthiness' of borrowers. We do see higher concentration of no work history in past due and unsuccessful loans, however we also see high success rates for borrowers with just a little work history.*      
 
 *******
 
@@ -861,7 +866,7 @@ print("Is Borrower a Homeowner")
 univariateHomeowner(Prosper_Post09_Subset)
 ```
 
-*Trend towards more homeowners with successful loans, one exception is previous Prosper borrowers who are past due. This variable has appears to have explanatory power as it relates to my groups and question.*
+*Trend towards more homeowners with successful loans, one exception is previous Prosper borrowers who are past due. This variable has appears to have explanatory power as it relates to my groups and question. While not a huge indicator, owning a home does suggest slightly less risk in a borrower.*
 
 ******** 
 
@@ -927,11 +932,11 @@ pairwise.wilcox.test(Prosper_Post09_Subset$OpenRevolvingMonthlyPayment,
     Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
 ```
 
-*The data shows a trend whereby successful borrowers make just slightly larger monthly payments on their revolving credit accounts then unsuccessful borrowers. Past due borrowers may actually spend the same or more then successful borrowers, this is strange as past due loanees very often mimic unsuccessful loanees in other variables. This suggests that how much you pay on monthly revolving open accounts has some explanatory powers as to whether or not you will be a successful Prosper borrower.  The difference between first time and previous borrowers is more subtle, it does appears that previous prosper borrowers who are past due or unsuccessful tend to spend more on monthly revolving payments then their first time counterparts. Overall previous users spend less monthly then first time users.*       
+*The data shows a trend whereby successful borrowers make just slightly larger monthly payments on their revolving credit accounts then unsuccessful borrowers. Past due borrowers may actually spend the same or more then successful borrowers, this is strange as past due loanees very often mimic unsuccessful loanees in other variables. This suggests that how much you pay on monthly revolving open accounts has some explanatory powers as to whether or not you will be a successful Prosper borrower. The difference between first time and previous borrowers is more subtle, it does appears that previous prosper borrowers who are past due or unsuccessful tend to spend more on monthly revolving payments then their first time counterparts. Overall previous users spend less monthly then first time users.*       
 
 ******* 
 ```{r echo=FALSE, comment=NA}
-univariateInquiresLast6Mon <- function(ProsperDataFrame){
+univariateInquiresLast6Months <- function(ProsperDataFrame){
     plot <- ggplot(ProsperDataFrame, aes(x = InquiriesLast6Months,
                                          ..density..)) + 
         coord_cartesian(xlim=c(0,10)) + 
@@ -945,7 +950,7 @@ univariateInquiresLast6Mon <- function(ProsperDataFrame){
     return(plot)
 }
 print("Inquiries in the Last 6 Months")
-univariateInquiresLast6Mon(Prosper_Post09_Subset)
+univariateInquiresLast6Months(Prosper_Post09_Subset)
 ```
 
 ```{r echo=FALSE,comment=NA}
@@ -956,7 +961,7 @@ pairwise.wilcox.test(Prosper_Post09_Subset$InquiriesLast6Months,
     Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
 ```
 
-*There appear to be more inquiries into borrowers whose loans are currently past due or unsuccessful. The differences between previous and first time borrowers could be a result of the first credit inquiry Propser made for the borrowers first loan. I would have guessed that there would be more delineation between the groups in this variable.*       
+*There appear to be more inquiries into borrowers whose loans are currently past due or unsuccessful. The differences between previous and first time borrowers could be a result of the first credit inquiry Propser made for the borrowers first Prosper loan. I would have guessed that there would be more delineation between the groups in this variable.*       
 
 ```{r echo = FALSE, comment=NA}
 univariateCurrentDelinquencies <- function(ProsperDataFrame){
@@ -987,7 +992,7 @@ pairwise.wilcox.test(Prosper_Post09_Subset$CurrentDelinquencies,
     Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
 ```
 
-*While some differences do exist between my groups of borrowers and groups of loan outcomes, it does not appear visually to be very large. I will consider looking into this variable further as it relates to other variables. There are more delinquent accounts for those borrowers who are past due on their Prosper loans, this is not too suprising. I would argue what is more suprising is the difference between successful loans and unsuccessful loans as it relates to prior delinquencies, I would have guessed the difference to be greater.*        
+*While some differences do exist between my groups of borrowers and groups of loan outcomes, it does not appear visually to be very large. I will consider looking into this variable further as it relates to other variables. There are more delinquent accounts for those borrowers who are past due on their Prosper loans, this is not too suprising. I would argue what is more suprising is the difference between successful loans and unsuccessful loans as it relates to prior delinquencies, before seeing this plot I would have guessed the difference to be greater.*        
 
 *******  
 ```{r echo = FALSE, comment=NA}
@@ -1017,7 +1022,7 @@ pairwise.wilcox.test(Prosper_Post09_Subset$AmountDelinquent,
     Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
 ```
 
-*Visual differences are slight. Looking at the scales reveals that most borrowers do not have any amount delinquent at the time of their credit being pulled.*   
+*Visual differences are slight. Looking at the scales reveals that most borrowers do not have any amount delinquent at the time of their credit being pulled. As a result I will not consider this variable a very strong indicator of borrowers 'creditworthiness'.*   
 
 *******    
 ```{r echo = FALSE, comment=NA}
@@ -1179,7 +1184,7 @@ pairwise.wilcox.test(Prosper_Post09_Subset$DebtToIncomeRatio,
     Prosper_Post09_Subset$Prosper_User_Status, p.adjust.method = "holm")
 ```
 
-*There appears to be statistically significant differences between first time and previous borrowers allthough the visual differences are minute. It is the case that on average successful loans tend to have borrowers with a lower debt to income ratio then past due and unsuccessful borrowers. It is equally as true thougth that for successful borrowers the most common debt to income ratio is approximately the same as past due and unsuccessful borrowers.*    
+*There appears to be statistically significant differences between first time and previous borrowers allthough the visual differences are minute. It is the case that on average successful loans tend to have borrowers with a lower debt to income ratio then past due and unsuccessful borrowers. It is equally as true however that for successful borrowers the most common debt to income ratio is approximately the same as past due and unsuccessful borrowers.*    
 
 ******  
 ```{r echo=FALSE, comment=NA}
@@ -1224,7 +1229,8 @@ univariateIncomeVerifiable(Prosper_Post09_Subset)
 
 ```{r,comment=NA}
 #sum(Prosper_Post09_Subset$IncomeVerifiable == "False")
-summary(Prosper_Post09_Subset$ProsperRating[Prosper_Post09_Subset$IncomeVerifiable == "False"])
+summary(Prosper_Post09_Subset$ProsperRating[
+    Prosper_Post09_Subset$IncomeVerifiable == "False"])
 
 ```
 
@@ -1246,7 +1252,8 @@ univariateTotalPaymentsBilled <- function(ProsperDataFrame){
         facet_grid(~Loan_Outcome, scales = "free", margin = TRUE)
     return(plot)
 }
-print("Number of on time Prosper Payments made (applies to previous borrowers only)")
+print("Number of on time Prosper Payments made 
+      (applies to previous borrowers only)")
 univariateTotalPaymentsBilled(Prosper_Post09_Subset)
 ```
 
@@ -1272,7 +1279,8 @@ univariatLessOneMonthLate <- function(ProsperDataFrame) {
         facet_grid(~Loan_Outcome, scales = "free", margin =TRUE)
     return(plot)
 }
-print("Prosper Payments Less Then One Month Late (applies to previous borrowers only)")
+print("Prosper Payments Less Then One Month Late 
+      (applies to previous borrowers only)")
 univariatLessOneMonthLate(Prosper_Post09_Subset)
 ```
 
@@ -1293,7 +1301,8 @@ univariateMoreOneMonthLate <- function(ProsperDataFrame){
         facet_grid(~Loan_Outcome, scales = "free", margin =TRUE)
     return(plot)
 }
-print("Prosper Payments More Than One Month Late (applies to previous borrowers only)")
+print("Prosper Payments More Than One Month Late 
+      (applies to previous borrowers only)")
 univariateMoreOneMonthLate(Prosper_Post09_Subset)
 ```
 
@@ -1316,7 +1325,8 @@ univariatePriorPrincinpleBorrowed <- function(ProsperDataFrame){
         facet_grid(~Loan_Outcome, scales = "free")
     return(plot)
 }
-print("Prosper Principle Borrowers by Previous Borrowers (applies to previous borrowers only)")
+print("Prosper Principle Borrowers by Previous Borrowers 
+      (applies to previous borrowers only)")
 univariatePriorPrincinpleBorrowed(Prosper_Post09_Subset)
 ```
 
@@ -1456,7 +1466,7 @@ univariateInvestors <- function(ProsperDataFrame){
                    margin= TRUE, drop=TRUE)
     return(plot)   
 }
-print("Number of Investor")
+print("Number of Investors")
 univariateInvestors(Prosper_Post09_Subset)
 ```
 
@@ -1628,13 +1638,13 @@ summary(subset(Prosper_Post09_Subset, select = -c(ListingKey,ListingDate)))
 #table(Prosper_Post09_Subset$Investors)
 ```
 
-After pairing down the original Prosper data set (~114,000 listings with 81 variables) and adding a few variables of my own I began my analysis with 84,881 loan listings each containing 38 features. These features are ordinal numbers, dates, factor variables and ratios. The key factor variables that I generated in my pursuit of my goal of this analysis, are the loan outcome variable; Current, Successful, Past Due and Unsuccessful. And Prosper User Status; First Time Borrowers and Previous Borrower. In continuing my analysis I will look more narrowly at the summary features, such as Prosper rating, credit range, lender return, estimated borrower APR, estimated lender return, Prosper user status and loan outcome.        
+After pairing down the original Prosper data set (~114,000 listings with 81 variables) and adding a few variables of my own I began my analysis with 84,881 loan listings each containing 38 features. These features are ordinal numbers, dates, factor variables and ratios. The key factor variables that I generated in my pursuit of my goal of this analysis, are the loan outcome variable; Current, Successful, Past Due and Unsuccessful. And Prosper User Status; First Time Borrowers and Previous Borrower. I also created a the ratio feature of lender return and payments to income ratio. In continuing my analysis I will look more narrowly at the summary features, such as Prosper rating, credit range, lender return, estimated borrower APR, estimated lender return, Prosper user status and loan outcome.        
 
-I believe that by looking into all of the features in my uni-variate plots above we can form a better understanding of what makes a borrower a safer or riskier prospect without looking at just one number (e.g. Prosper Rating) which may be an accurate measurement of risk but doesn't explain how the number was derived.          
+I believe that by looking into all of the features in the uni-variate plots above we can form a better understanding of what makes a borrower a safer or riskier prospect without looking at just one number (e.g. Prosper Rating) which may be an accurate measurement of risk but doesn't explain how the number was derived.          
 
 There are a total of 65,059 first time borrowers and 19,822 previous borrowers. Such a return rate is possibly reflective of Prosper's loan marketplace working successfully (in the sense that borrowers are coming back and lenders are reinvesting in the loanees). Most loans in this data-set are current (i.e. still on-going), 56,576 to be exact. This means that they are not past due or delinquent in any way and are making payments successfully. These loans will be in different stages of their life (just beginning all the way to their second to last month) but If we continue looking into the loan outcome variable we can hypothesize that many of these loans will be successful based on the following evidence. Of the 26,238 concluded loans, 19,894 of them are successful, they have been completed or are on their last payment.  There are 6,344 loans which are unsuccessful, meaning these loans have been charged off (written off), cancelled or are delinquent. Finally in the whole data set there are 2,067 loan listings currently in some stage of past due, these loans are late but not yet failures. At a 3 to 1 success rate (for this snapshot data-set) the number of successful loans in my opinion is to high to declare Prosper's loan marketplace a failure.      
 
-It will be interesting to explore further in this analysis whether or not these roughly 6,000 borrowers were rated as a high risk or if they received more favorable scores on metrics designed to measure risk (Prosper rating, credit range). If most of these borrowers were given scores indicating very high risk then I would conclude that Prosper is doing a good job of accurately informing its investors of potential risks.       
+It will be interesting to explore further in this analysis whether or not these roughly 6,000 unsuccesful borrowers were rated as a high risk or if they received more favorable scores on metrics designed to measure risk (Prosper rating, credit range). If most of these borrowers were given scores indicating very high risk then I would conclude that Prosper is doing a good job of accurately informing its investors of potential risks.       
 
 The median return rate for all loans is:  ~8%, while the median estimated return rate hovers right around 9%.       
 The most common credit scores for Prosper borrowers is in the range: 660-679 (not terribly high).       
@@ -1649,13 +1659,13 @@ The most common number of investor for a Prosper loan is: 1.
 The main features of interest in my data set are the loan outcomes, the lender return(numeric representation of loan outcomes), credit-range and Prosper ratings. Remember that the goal is to determine if Prosper provides a viable platform for individual investor to make loans without so much undo risk that it keeps the average investor from considering the Prosper marketplace as a viable investment option. Ultimately I would like to see if this style of open marketplace for loans can displace institutional loans and whether or not Prosper can adequately bridge the gap of asymmetric information for borrowers and lenders. The achievement of this goal would manifest itself in investors who achieved positive gain on their investments, received higher returns on riskier investments and where a loan does fail the investor was adequately warned with high risk scores on Prosper's risk rating system.
 
 ###Other features in the dataset that help support my investigation into the features of interest?
-I've looked into all of the features that made it to the plotting stage, most of which have some value in regards to whether or not individual investors are able to use them determine a borrowers creditworthiness. Moving forward I will narrow my focus to a smaller number of variables to be plotted in multi-variate plots as they relate to the Prosper rating systems of risk and reward seen by lenders. Some of these features will be debt to income ratios, estimated returns, number of investors, Prosper user status, and Prosper loan payment to income ratio and of course lender returns and lender outcome. 
+I've looked into all of the features that made it to the plotting stage, most of which have some value in regards to whether or not individual investors are able to use them determine a borrowers creditworthiness. Moving forward I narrow my focus to a smaller number of variables to be plotted in multi-variate plots as they relate to the Prosper rating systems of risk and reward seen by lenders. Some of these features will be debt to income ratios, estimated returns, number of investors, Prosper user status, and Prosper loan payment to income ratio and of course lender returns and lender outcome. 
 
 ###Creation of new variables from existing variables in the dataset?
 I created several new variables, Prosper User Status; this variable reflects whether the loan listing is from a previous Prosper borrower or a first time Prosper borrower. Loan Outcome; this variable is an aggregation of the loan status variable into just 4 categories, current loans, successful loans, past due loans, and unsuccessful loans. Credit range, this variable combined the upper and lower bound credit scores into a range between those two. credit history in years was created by looking into the first reported credit date and the date of the latest credit check, subtracting those two and converting them into years. Payment to monthly income variable was created to reflect how much of a borrowers income was spent on payments for their Prosper loan. Finally I created lender return to reflect the actual interest that an investor sees from their loans to borrowers. This variable is most informative for successful and unsuccessful loans. 
 
 ###Unusual distributions? Operations on the data to tidy, adjust, or change the form of the data? why?
-I performed several operations on the data, to begin with I transformed all of the date times to reduce the detail to just the month day and year. I also factored variables which should be categorical(many the ones I created). I filtered my data to remove all loan listing before a certain date (2009). I created a function to change the state abbreviations for the purpose of graphing a map with frequency of borrowers by state. Several of my plots have had their axis's transformed by square root functions and most have been constrained to reflect only feature data up to the $99^{th}$ quantile in order to weed out potential outliers. All of my plots reflect the density distributions as a result of the data containing large ranges in the scales and different scales between my facet variables. I reordered several of the factor variables so that the axis label orders made more sense in my opinion. I dropped several variables on the basis of their containing mostly 'NA' values. I renamed several of my variables in order to shorten the length of feature names. All of the percentages on the x-axis are decimals which I converted only for the plot labels. Additionally for the payments to monthly income variable whose loan listings provided no income information were lumped into the category of borrowers whose payments are more then 100% of their income. There were only ten listings above 100% after this operation therefore whatever error was involved in my decision to impute the data in this fashion is hopefully minor.  
+I performed several operations on the data, to begin with I transformed all of the date times to reduce the detail to just the month day and year. I also factored variables which should be categorical (including most of the ones I created). I filtered my data to remove all loan listings before a certain date (2009). I created a function to change the state abbreviations for the purpose of graphing a map with frequency of borrowers by state. Several of my plots have had their axis's transformed by square root functions and most have been constrained to reflect only feature data up to the $99^{th}$ quantile in order to weed out potential outliers. All of my plots reflect the density distributions as a result of the data containing large ranges in the scales and different scales between my facet variables. I reordered several of the factor variables so that the axis label orders made more sense in my opinion. I dropped several variables on the basis of their containing mostly 'NA' values. I renamed several of my variables in order to shorten the length of feature names. All of the percentages on the x-axis are decimals which I converted only for the plot labels. Additionally for the payments to monthly income variable whose loan listings provided no income information were lumped into the category of borrowers whose payments are more then 100% of their income. There were only ten listings above 100% after this operation therefore whatever error was involved in my decision to impute the data in this fashion is hopefully minor.  
 
 *******************  
 ##Part 2 - Multivariate & Final plots
@@ -2115,7 +2125,7 @@ investorsByReturns(df)
 
 ##Part 2 Analysis -- Mulit-variate and Final Plot Analysis      
 ###Relationships observed in this part of the investigation. How did my features of interest vary with other features in the dataset?
-I found clear relationships between Prosper ratings and credit ranges. Furthermore and fortunately for Prosper investor there is also a relationship to be found between Prosper ratings and loan outcomes, both in a broad sense, did the loan succeed or fail and in a more minute way such as was the return minimal or larger. There are also relationships to be found between the number of investors and the return seen by the investors. We also see that the Prosper rating has a relationship to the number of investors. Loan outcomes have some relationship to homeowner status, and throughout all of my variables of interest the difference between first time and prior borrowers was noticeable. There are correlations to be found among estimated and actual return although not as much as I might have guessed. When looking at lender returns we can see that for lower positive returns we see higher Prosper ratings (less risk), higher credit_ranges(less risk), homeowner status, lower debt to income ratios and a larger number of investor per listing. Conversely we see higher return and most negative returns associated with lower Prosper ratings (high risk) and credit ranges (although not as clearly as Prosper ratings), lower number of investors and higher debt to income. 
+I found clear relationships between Prosper ratings and credit ranges. Furthermore and fortunately for Prosper investors there is also a relationship to be found between Prosper ratings and loan outcomes, both in a broad sense, did the loan succeed or fail and in a more minute way such as was the return minimal or large. There are also relationships to be found between the number of investors and the return seen by the investors. Loan outcomes have some relationship to homeowner status, and throughout all of my variables of interest the difference between first time and prior borrowers was noticeable. There are correlations to be found among estimated and actual lender returns although not as much as I might have guessed. When looking at lender returns we can see that for lower positive returns we see higher Prosper ratings (less risk), higher credit_ranges (less risk), homeowner status, lower debt to income ratios and a larger number of investor per listing. Conversely we see higher return and most negative returns associated with lower Prosper ratings (high risk) and credit ranges (although not as clearly as Prosper ratings), lower number of investors and higher debt to income. 
 
 ### What were the relationships found?
 The strongest relationship found was between my loan outcome and lender return, but these two are directly related and therefore not very interesting when looking at correlations. The second strongest relationship is between Prosper Rating and Estimated Return, again these should be closely tied together as one is suppose to depend on the other. There is a relationship to be found, although not a strong one, between Prosper rating and loan outcome. There's a much stronger relationship between credit range and Prosper Rating, which is not to surprising after reviewing the above charts. We can find a relatively strong relationship between Prosper user status and credit ranges. In regards to several of my features of interest, lender return, Prosper rating and credit ranges we see weak correlations between these variables and income ranges.            
@@ -2206,13 +2216,13 @@ varImpPlot(Prosper_train_clf)
 ##Summary  
 The initial Prosper data set contained a large quantity of information regarding its users and after deciding I would approach this data-set as if I were a potential investor investigating the Prosper marketplace I set to work examining the key variables I felt most relevant to that archetype. After deciding on a general goal of analyzing the efficacy of Prospers peer-to-peer marketplace on the bases of whether or not the creditworthiness of its users could be adequately assessed and accounted for, I began munging the data set. After looking over the variables I removed all those loan listing pre-2009. Reflecting that 81 variables is not conducive to brief exploratory analysis I dropped many variables that either contained information I was not interesting in exploring or whose data was a part of another variable. Deciding to focus on the outcome of the loans, chiefly whether it was successful or not and desiring to see the actual return rate investors received I created several new variables to capture this goal, loan outcome and lender return.   
 
-Reducing my variables down to 38 I proceeded to create 'uni-variate' plots of most of these variables, with the understanding that I would not be exploring many of them any further. As I was not intending to explore the variables further but still being interested in understanding how they relate to my groups and goal, I introduced my new group variables to the plots through the use of faceting. This means there was more then one variable in my resulting plots, although I did include a true uni-variate plot in most of facet grids. I found that by faceting I shed a lot more light the variables relations to my goal then had I simply looked at the collective. Many of these plots confirmed that the variable had some relationship to my groups. It quickly become clear however that very large visual differences were not going to be seen between any of the variables and my groups. This makes sense, if it were the case that a few key variables explained all of a borrowers credit worthiness there would not be much risk in lending nor art in deciding which variables in a borrowers credit history accurately predict creditworthiness. Even though most of the uni-variate plots contained variables that were not going to be explored further I felt it would be valuable to see these variables and how they changed based on my groups as their origins are easier to understand then a credit score or Prosper rating. 
+Reducing my variables down to 38 I proceeded to create 'uni-variate' plots of most of these variables, with the understanding that I would not be exploring many of them any further. As I was not going to explore the variables further but still being interested in understanding how they relate to my groups and goal, I introduced my new group variables to the plots through the use of faceting. I found that by faceting I shed a lot more light on the variables relationship to my goal then had I simply looked at the collective. Many of these plots confirmed that the variable had some relationship to my groups. It quickly become clear however that very large visual differences were not going to be seen between any of the variables and my groups. This makes sense, if it were the case that a few key variables explained all of a borrowers credit worthiness there would not be much risk in lending nor art in deciding which variables in a borrowers credit history accurately predict creditworthiness. Even though most of the uni-variate plots contained variables that were not going to be explored further I felt it would be valuable to see these variables and how they changed based on my groups as their origins are easier to understand then a credit score or Prosper rating. 
 
-Wrapping up the faceted single variable plots I shifted my focus down to a smaller set of variables which were explored in more detail. Running a correlation analysis on the reduced set of features revealed a mix bag of correlations. Some features such as debt to income ratio and lender return share almost no correlation which I found very interesting as their does appear to be a relationship between debt to income ratio and Prosper rating. Other feature correlations such as Prosper user status are related to Loan outcome, suggesting that knowledge of prior Prosper loan performance is a superior metric than most first time borrower metrics. In regards to my features of interest the variables most strongly correlated with lender return and loan outcome are Prosper rating, estimated return, Prosper user status and Income range. Following the correlation analysis I plotted my features of interest along with several other features that vary noticeably with my loan outcomes and lender return. For both the credit range and Prosper rating we see correlation with lender return. We also find in the mosaic plots a clear correlation between the Prosper rating and credit range variables themselves. Continuing I found a trend whereby lower Prosper ratings and credit ranges are more likely to be associated with failed loans (negative returns) and if we look at the variables of importance in the random forest classification model we can see this numerically. 
+Wrapping up the faceted single variable plots I shifted my focus down to a smaller set of variables which were explored in more detail. Running a correlation analysis on the reduced set of features revealed a mix bag of correlations. Some features such as debt to income ratio and lender return share almost no correlation which I found very interesting as their does appear to be a relationship between debt to income ratio and Prosper rating. Other feature correlations such as Prosper user status are related to loan outcomes, suggesting that knowledge of prior Prosper loan performance is a superior metric than most first time borrower metrics. In regards to my features of interest the variables most strongly correlated with lender return and loan outcome are Prosper rating, estimated return, Prosper user status and income range. Following the correlation analysis I plotted my features of interest along with several other features that vary noticeably with my loan outcomes and lender return. For both the credit range and Prosper rating we see correlation with lender return. We also find in the mosaic plots a clear correlation between the Prosper rating and credit range variables themselves. Continuing I found a trend whereby lower Prosper ratings and credit ranges are more likely to be associated with failed loans (negative returns) and if we look at the variables of importance in the random forest classification model we can see this numerically. 
 
-While the model is fairly basic it suggests that estimated return plays a large part in predicting loan outcomes. The Prosper rating and credit range both play a part both in predicting successful loans but also in predicting unsuccessful loans. Ultimately the variables which offer the most information in terms of accurate predictions are estimated return Borrower APR, credit range, payment to monthly income and debt to income ratios. It is interesting to note that the debt-to-income ratio is important to the model accuracy but the correlation analysis did not find a strong correlation between loan outcomes and debt-to-income ratios.
+While the model is fairly basic it suggests that estimated return plays a large part in predicting loan outcomes. The Prosper rating and credit range both play a part both in predicting successful loans but also in predicting unsuccessful loans. Ultimately the variables which offer the most information in terms of accurate predictions are estimated return, borrower APR, credit range, payment to monthly income and debt to income ratios. It is interesting to note that the debt-to-income ratio is important to the model accuracy but the correlation analysis did not find a strong correlation between loan outcomes and debt-to-income ratios.
 
 #Reflections and Issues
-The Prosper data set offered a unique look into its borrowers and the platform itself is certainly unconventional. After briefly exploring the data I would feel much more comfortable about investing my own money in this marketplace. As with any lending transaction there certainly exist some risk that you will lose nearly all your money, however loans that typically fail this badly are broadly ranked as high risk. The real science to achieving success as an investor with Prosper would be picking those loans rated as higher risk but still succeed with regularity. Prosper perhaps to protect its investors and possibly to generate more revenue appear to be conservative in their rating methodology, at least as it compares to standard credit ranges. Clearly we do not want to see any failed loans, but If we do we would like to see them with very high risk ratings. There is no perfect marketplace of loans where getting paid back is a certainty and in Prosper's marketplace the individual borrowers will likely have a harder time weathering lost capital then say a larger bank. That being said I think that for those investors willing to except a little risk the Prosper marketplace provides a viable platform for investing your money especially in higher rated loans. 
+The Prosper data set offered a unique look into its borrowers and the platform itself is certainly unconventional. After briefly exploring the data I would feel much more comfortable about investing my own money in this marketplace. As with any lending transaction there certainly exist some risk that you will lose your money, however loans that typically fail this badly are very often ranked as high risk. The real science to achieving success as an investor with Prosper would be picking those loans rated as higher risk but still succeed with regularity. Prosper, perhaps to protect its investors and possibly to generate more revenue, appear to be conservative in their rating methodology, at least as it compares to standard credit ranges. Clearly we do not want to see any failed loans, but If we do we would like to see them with very high risk ratings. There is no perfect marketplace of loans where getting paid back is a certainty and in Prosper's marketplace the individual borrowers will likely have a harder time weathering lost capital then say a larger bank. That being said I think that for those investors willing to except a little risk the Prosper marketplace provides a viable platform for investing your money especially in higher rated loans. 
 
-Working with so many factor variables constrained some of my plotting options and lead to my use some less statistically rigorous analysis techniques to find correlations. Several of my variables were abandoned as a result of likely containing too many lurking variables. I personally believe that a more robust analysis of Prosper loan listings could be performed with a longer time frame and I would enjoy an opportunity to review loan listings over a longer time frame. Much of this analysis relies on the belief that the particular quarter this data was drawn from is representative of all Prosper loan listings. This assumption may be a bit of a stretch. Also I'd like to to see if I couldn't construct a model that would predict actual lender return as a percentage, furthermore it would be interesting to see if I couldn't optimize my current classification model to improve the accuracy above 90%. It should be noted that my current models importance measurements may be biased ([Understanding variable importances in forests of randomized trees](http://papers.nips.cc/paper/4928-understanding-variable-importances-in-forests-of-randomized-trees.pdf)). This might explain some of the disparity between my correlation analysis and variable importance report. I had to do a fair bit of searching for methods of displaying some of the data with really large ranges in scale of data specifically when it included both negative and positive values. I also ran into some difficulty when using more than a 12 level factor variable to color plots, apparently there is a limit to what ggplot can automatically handle when coloring on a factor variable. I found it necessary to cut out some of the data included in a few of the variables that may have been outliers or real data, regardless these data points prevented me from seeing the meat of the data when plotted. The biggest challenge in this analysis may simply have been the size of the data set (variables) and having to cut out many variables and possible relationships to reach even this not insignificant length. The only other point of frustration was the slightly esoteric feature descriptions, not being in the industry I would have found some domain knowledge helpful in this case. I looked up a lot of the lending lingo for the features but having a better understanding of what is normal in the traditional lending market could have been helpful in determine just how unique or normal Prosper users were compared to traditional borrowers. 
+Working with so many factor variables constrained some of my plotting options and lead to my use of some less statistically rigorous analytical techniques to find correlations (pair-wise Mann Whitney and heterogeneous correlation tests). Several of my variables were abandoned as a result of likely containing too many lurking variables. I believe that a more robust analysis of Prosper loan listings could be performed with a longer time frame and I would enjoy an opportunity to review loan listings over a longer time frame. Much of this analysis relies on the belief that the particular quarter this data was drawn from is representative of all Prosper loan listings. This assumption may be a bit of a stretch. Also I'd like to to see if I couldn't construct a model that would predict actual lender return as a percentage, furthermore it would be interesting to see if I couldn't optimize my current classification model to improve the accuracy above 90%. It should be noted that my current models importance measurements may be biased ([Understanding variable importances in forests of randomized trees](http://papers.nips.cc/paper/4928-understanding-variable-importances-in-forests-of-randomized-trees.pdf)). This might explain some of the disparity between my correlation analysis and variable importance report. I had to do a fair bit of searching for methods of displaying some of the data with really large ranges in scale of data specifically when it included both negative and positive values. I also ran into some difficulty when using more than a 12 level factor variable to color plots, apparently there is a limit to what ggplot can automatically handle when coloring on a factor variable. I found it necessary to cut out some of the data included in a few of the variables that may have been outliers or real data, regardless these data points prevented me from seeing the meat of the data when plotted. The biggest challenge in this analysis may simply have been the size of the data set (variables) and having to cut out many variables and possible relationships to reach even this not insignificant length. The only other point of frustration was the slightly esoteric feature descriptions, not being in the industry I would have found some domain knowledge helpful in this case. I looked up a lot of the lending lingo for the features but having a better understanding of what is normal in the traditional lending market could have been helpful in determining just how unique or normal Prosper users are compared to traditional borrowers. 
