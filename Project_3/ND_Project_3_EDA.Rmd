@@ -32,7 +32,7 @@ To begin I installed several packages and set the R-libraries required for the r
 *********         
 ##Dataset Preparation     
 ```{r echo=FALSE}
-setwd("/Users/Zach/Desktop/Udacity_DataAnalyst_ND/Project_3/")
+setwd("~/Desktop/Udacity_DataAnalyst_ND/Project_3/")
 ```
 
 ###Packages for Analysis          
