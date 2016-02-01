@@ -23,6 +23,9 @@ The files contained in this directory contain all of the resources and functions
 `enron61702insiderpay.pdf`:       
 * pdf version of the financial information used mainly for reference.     
 
+`References.txt`:
+* text file containing the references used during the course of this project.       
+
 `my_classifier.pkl`:      
 * Trained classifer (pipeline object) as a pickled object.   
  
