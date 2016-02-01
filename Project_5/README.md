@@ -52,4 +52,4 @@ The files contained in this directory contain all of the resources and functions
 
 `References.txt`: 
 * Text File containing the references referred to during the course of the project.    
-* 
+
