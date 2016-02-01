@@ -91,9 +91,9 @@ def newFeatures(data_dict):
         data_dict[name]['salary_to_totalPayment_ratio'] = salary_to_totalPayment_ratio
         
         salary = data_dict[name]['salary']
-        total_stock_value = data_dict[name]['total_stock_value'] 
-        salary_to_totalStockValue_ratio = computeFraction(salary, total_stock_value)
+        total_stock = data_dict[name]['total_stock_value'] 
+        salary_to_stockValue_ratio = computeFraction(salary, total_stock)
         
-        data_dict[name]['salary_to_totalStockValue_ratio'] = salary_to_totalStockValue_ratio
+        data_dict[name]['salary_to_stockValue_ratio'] = salary_to_stockValue_ratio
         
     return data_dict   
