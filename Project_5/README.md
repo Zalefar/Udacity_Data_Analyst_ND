@@ -49,5 +49,7 @@ The files contained in this directory contain all of the resources and functions
  
 `tools/`:       
 * Udacity provided directory containing functions that are used in the processing of the dataset into numpy arrays of features and labels.       
-  
 
+`References.txt`: 
+* Text File containing the references referred to during the course of the project.    
+* 
