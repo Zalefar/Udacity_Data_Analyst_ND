@@ -21,22 +21,24 @@
 ***
 **Answer:**   
 *What features did you end up using in your POI identifier?*   
-Features used in the POI identifier model from Sklearn's SelectPercentile:
-['expenses',
- 'deferred_income',
- 'from_poi_to_this_person',
- 'exercised_stock_options',
- 'shared_receipt_with_poi',
- 'loan_advances',  
- 'other',
- 'bonus',
- 'total_stock_value',
- 'long_term_incentive',
- 'restricted_stock',
- 'salary',
- 'total_payments',
- 'fraction_to_poi',
+* Features used in the POI identifier model from Sklearn's SelectPercentile:
+```python
+['expenses',      
+ 'deferred_income',    
+ 'from_poi_to_this_person',      
+ 'exercised_stock_options',       
+ 'shared_receipt_with_poi',      
+ 'loan_advances',       
+ 'other',     
+ 'bonus',      
+ 'total_stock_value',      
+ 'long_term_incentive',     
+ 'restricted_stock',     
+ 'salary',      
+ 'total_payments',     
+ 'fraction_to_poi',      
 ]
+```
 * In addition I implemented a PCA on all of the features and returned the top 22 components. These top 22 components were combined with the top 61% of features using sklearn's feature union method       
 
 *What selection process did you use to pick them?*     
@@ -51,8 +53,8 @@ Features used in the POI identifier model from Sklearn's SelectPercentile:
 *In your feature selection step, if you used an automated feature selection function like SelectKBest, please report the feature scores and reasons for your choice of parameter values.*    
 * I used Sklearn's SelectPercentile method to select my features. The parameter choice of 61% for the Select-Percentile method was arrived at after running a randomized grid search over my feature selection and algorithm parameters. The combination with the best outcome was a combination of the top 61% of features and the top 22 principle components from the PCA. Technically the top 22 components are transformations of the features therefore I used 14 of the original features but all the features were used to generate the 22 principle components.    
 
-F-statistics of sklearn's f-classif (ANOVA) for features:
-
+* F-statistics of sklearn's f-classif (ANOVA) for features:
+```python
 [('total_stock_value', 22.783481328003685),
  ('exercised_stock_options', 22.610389609556254),
  ('bonus', 21.060001707536571),
@@ -76,9 +78,9 @@ F-statistics of sklearn's f-classif (ANOVA) for features:
  ('deferral_payments', 0.2170589303395084),
  ('from_messages', 0.16416449823428736),
  ('salary_to_stockValue_ratio', 0.022229695372865222)]
-
-P-values of sklearn's f-classif (ANOVA) for features:
-
+```
+* P-values of sklearn's f-classif (ANOVA) for features:
+```python
 [('total_stock_value', 4.4581962180195415e-06),
  ('exercised_stock_options', 4.8180739513255001e-06),
  ('bonus', 9.7024743412322453e-06),
@@ -102,9 +104,9 @@ P-values of sklearn's f-classif (ANOVA) for features:
  ('deferral_payments', 0.64200389403828306),
  ('from_messages', 0.68596070789958996),
  ('salary_to_stockValue_ratio', 0.88168921319693783)]
-
-The variance explained by the top 22 components of the PCA:
-
+```
+* The variance explained by the top 22 components of the PCA:
+```python
 [(1, 0.80812036659075415),
  (2, 0.15586745915579647),
  (3, 0.015109657195381328),
@@ -127,7 +129,7 @@ The variance explained by the top 22 components of the PCA:
  (20, 1.5071393030939921e-14),
  (21, 1.3600895757998964e-16),
  (22, 8.2573694413750787e-17)]
-
+```
 ***3. what algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?***    
 ****
 **Answer:**     
@@ -145,7 +147,16 @@ The variance explained by the top 22 components of the PCA:
 
 ***6. Give at least 2 evaluation metrics and your average performance for each of them.  Explain an interpretation of your metrics that says something human-understandable about your algorithm’s performance.***  
 ****
-**Answer:**   
+**Answer:**  
+```
+Logistic Regression Classifier Report:
+             precision    recall  f1-score   support
+
+    non-poi       1.00      0.81      0.89        21
+        poi       0.20      1.00      0.33         1
+
+avg / total       0.96      0.82      0.87        22
+```    
 > NOTE: The following answer is based on my results from testing on my holdout test set. The results from the `tester.py` are different, however the essence of the results are the same. The test set uses more 'support' data points both non-poi and poi so the extremes in my results, the 100%, are mellowed out to much lower then 100%. That being said the result are proportionally very similar between my test data and the `tester.py` outcome.    
 
 * The classification report above is telling us a few important things about the models performance. The precision metric is indicating the percentage of instances that were flagged as non-pois and pois that were in truth non-pois and pois. The recall on the other hand is indicating the percentage of predicted non-poi's and poi's that really existed compared to what the model predicted existed. Given this information we can say that according to this classification report our model does an descent job of correctly identifying non-poi's  (perfect 100%) and poi's (20% not great) when it makes such a prediction. Our model however has more success when it comes to correctly identifying all the actual poi's in the test data (100%). We can see that it correctly identifies many non-pois but does slightly worse at finding all of the real non-poi's in the test-date. Our model does an excellent job of actually 'capturing' (predicting) most of the real poi's present in the test data. Personally I think this is a good thing, although this model is more likely to cause a greater workload for those tasked with looking into the individuals.   
