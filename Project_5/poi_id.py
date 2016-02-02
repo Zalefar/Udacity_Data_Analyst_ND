@@ -195,7 +195,7 @@ if __name__=="__main__":
     ## Select pipeline object is not found in a the local directory in the pickle file. 
     ## This block of code will rerun the entire grid search and pipeline process to 
     ## generate the content that should be available in the pickle file. All random states
-    ## have been set, theoretically the outcome should be the same each time the code is 
+    ## have been set, I believe the outcome should be the same each time the code is 
     ## run
     if "Best_Classifiers.pkl" not in os.listdir('.'):    
         ## set random seed generator for the sciy.stats    
@@ -227,6 +227,7 @@ if __name__=="__main__":
                                     n_iter = 50,\
                                     test_size = .3,\
                                     random_state=42)
+        
         ## list of classifier to compare
         classifiers = {
                    "GNB": GaussianNB(), 
@@ -302,31 +303,25 @@ if __name__=="__main__":
         PickleBestClassifers(best_classifiers,"Best_Classifiers.pkl")
     
     else:
-        ## After initial run of grid search, reference the pickled outcomes for the 
-        ## rest of the analysis. Actual searching process takes some time
-        ## on my system setup, want to run it as few times as possible. 
         savedResults = open("Best_Classifiers.pkl",'r')  
         best_classifiers = pickle.load(savedResults)  
 
-## If the best classifier are pickled in the local directory then find only the 
-## required objects for the tester.py script.
+    ## Remove Outliers
+    data_dict = removeOutliers(data_dict,['Total'])
 
-## Remove Outliers
-data_dict = removeOutliers(data_dict,['Total'])
+    ### Store to my_dataset for easy export below.
+    my_dataset = newFeatures(data_dict) 
 
-### Store to my_dataset for easy export below.
-my_dataset = newFeatures(data_dict) 
+    ### features_list is a list of strings, each of which is a feature name.
+    ### The first feature must be "poi".
+    features_list = generateFeaturesList(my_dataset)
+    
+    ## Best classifier
+    clf = best_classifiers["LRC"]
 
-### features_list is a list of strings, each of which is a feature name.
-### The first feature must be "poi".
-features_list = generateFeaturesList(my_dataset)
-
-## Best classifier
-clf = best_classifiers["LRC"]
-
-### Dump classifier, dataset, and features_list so anyone can
-### check your results. You do not need to change anything below, but make sure
-### that the version of poi_id.py that you submit can be run on its own and
-### generates the necessary .pkl files for validating your results.
-dump_classifier_and_data(clf, my_dataset, features_list)
+    ### Dump classifier, dataset, and features_list so anyone can
+    ### check your results. You do not need to change anything below, but make sure
+    ### that the version of poi_id.py that you submit can be run on its own and
+    ### generates the necessary .pkl files for validating your results.
+    dump_classifier_and_data(clf, my_dataset, features_list)
  
