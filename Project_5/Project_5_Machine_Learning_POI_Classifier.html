@@ -301,7 +301,7 @@ div#notebook {
 <p><code>poi_id.py</code> : <em>Starter code for the POI identifier</em></p>
 <p><code>final_project_dataset.pkl</code> : <em>The dataset for the project, more details below.</em></p>
 <p><code>tester.py</code> : <em>code to test results</em></p>
-<p><code>emails_by_address</code> : <em>this directory contains many text files, each of which contains all the messages to or from a particular email address, It is for reference.</em></p>
+<p><code>emails_by_address.tar.gz</code> : <em>this zipped directory contains many text files, each of which contains all the messages to or from a particular email address, It is for reference.</em></p>
 <p><code>poi_names.txt</code> : <em>hand coded person of interest ground truth values. A list of the real poi's and non poi's hand coded and provided by Udacity.</em></p>
 <p><code>enron61702insiderpay.pdf</code>: <em>financial data in pdf format, used for description of the financial features.</em></p>
 <p><code>tools/</code>: <em>directory containing supplemental modules written by Udacity instructors. Necessary for testing script and general feature extraction.</em></p>
@@ -833,7 +833,13 @@ separate the classes of the data with the existence of just one feature then mac
     
     <span class="n">poi_emails_in_dataset</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="s">&#39;email_address&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span>\
                              <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s">&#39;poi&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
-    
+    <span class="c">## If just clone from github repository unzip emails_by_address for parsing by following </span>
+    <span class="c">## code.</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s">&quot;emails_by_address&quot;</span><span class="p">)):</span>
+        <span class="k">continue</span>  
+    <span class="k">else</span><span class="p">:</span>
+        <span class="o">!</span>tar -zxvf emails_by_address.tar.gz
+        
     <span class="c">## Count the number of data points that include email addresses</span>
     <span class="k">print</span> <span class="s">&quot;Number of data points (persons) in the dataset with a known email address:__{0}__&quot;</span><span class="o">.</span>\
     <span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_dataset_emails</span><span class="p">))</span> <span class="c">#Remove the NaN value</span>
