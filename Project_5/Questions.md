@@ -133,6 +133,119 @@
 ***3. what algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?***    
 ****
 **Answer:**     
+```
+Parameters for GNB
+FEATURE SELECTION:
+[{'n_jobs': 1, 'univ_select': SelectPercentile(percentile=11,
+         score_func=<function f_classif at 0x10bd5bd70>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=2, whiten=False)), ('univ_select', SelectPercentile(percentile=11,
+         score_func=<function f_classif at 0x10bd5bd70>))], 'pca__n_components': 2, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=2, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10bd5bd70>, 'univ_select__percentile': 11}]
+SCALER:
+[MinMaxScaler(copy=True, feature_range=(0, 1))]
+CLASSIFIER:
+[GaussianNB()]
+
+
+GNB Score:
+             precision    recall  f1-score   support
+
+    non-poi       0.95      0.90      0.93        21
+        poi       0.00      0.00      0.00         1
+
+avg / total       0.91      0.86      0.88        22
+
+Parameters for LRC
+FEATURE SELECTION:
+[{'n_jobs': 1, 'univ_select': SelectPercentile(percentile=61,
+         score_func=<function f_classif at 0x10bd5bd70>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=22, whiten=False)), ('univ_select', SelectPercentile(percentile=61,
+         score_func=<function f_classif at 0x10bd5bd70>))], 'pca__n_components': 22, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=22, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10bd5bd70>, 'univ_select__percentile': 61}]
+SCALER:
+[MinMaxScaler(copy=True, feature_range=(0, 1))]
+CLASSIFIER:
+[LogisticRegressionCV(Cs=2, class_weight='balanced', cv=None, dual=False,
+           fit_intercept=True, intercept_scaling=1.0, max_iter=100,
+           multi_class='ovr', n_jobs=1, penalty='l2', random_state=42,
+           refit=True, scoring=None, solver='lbfgs', tol=0.0001, verbose=0)]
+
+
+LRC Score:
+             precision    recall  f1-score   support
+
+    non-poi       1.00      0.81      0.89        21
+        poi       0.20      1.00      0.33         1
+
+avg / total       0.96      0.82      0.87        22
+
+Parameters for RDF
+FEATURE SELECTION:
+[{'n_jobs': 1, 'univ_select': SelectPercentile(percentile=91,
+         score_func=<function f_classif at 0x10bd5bd70>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=2, whiten=False)), ('univ_select', SelectPercentile(percentile=91,
+         score_func=<function f_classif at 0x10bd5bd70>))], 'pca__n_components': 2, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=2, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10bd5bd70>, 'univ_select__percentile': 91}]
+SCALER:
+[MinMaxScaler(copy=True, feature_range=(0, 1))]
+CLASSIFIER:
+[RandomForestClassifier(bootstrap=True, class_weight='balanced',
+            criterion='entropy', max_depth=21, max_features='auto',
+            max_leaf_nodes=None, min_samples_leaf=1, min_samples_split=2,
+            min_weight_fraction_leaf=0.0, n_estimators=161, n_jobs=1,
+            oob_score=False, random_state=None, verbose=0,
+            warm_start=False)]
+
+
+RDF Score:
+             precision    recall  f1-score   support
+
+    non-poi       0.95      0.95      0.95        21
+        poi       0.00      0.00      0.00         1
+
+avg / total       0.91      0.91      0.91        22
+
+Parameters for ADB
+FEATURE SELECTION:
+[{'n_jobs': 1, 'univ_select': SelectPercentile(percentile=91,
+         score_func=<function f_classif at 0x10bd5bd70>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=2, whiten=False)), ('univ_select', SelectPercentile(percentile=91,
+         score_func=<function f_classif at 0x10bd5bd70>))], 'pca__n_components': 2, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=2, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10bd5bd70>, 'univ_select__percentile': 91}]
+SCALER:
+[MinMaxScaler(copy=True, feature_range=(0, 1))]
+CLASSIFIER:
+[AdaBoostClassifier(algorithm='SAMME.R',
+          base_estimator=DecisionTreeClassifier(class_weight='balanced', criterion='gini',
+            max_depth=None, max_features=None, max_leaf_nodes=None,
+            min_samples_leaf=1, min_samples_split=2,
+            min_weight_fraction_leaf=0.0, presort=False, random_state=None,
+            splitter='best'),
+          learning_rate=301.824709451, n_estimators=49, random_state=None)]
+
+
+ADB Score:
+             precision    recall  f1-score   support
+
+    non-poi       1.00      0.86      0.92        21
+        poi       0.25      1.00      0.40         1
+
+avg / total       0.97      0.86      0.90        22
+
+Parameters for SVC
+FEATURE SELECTION:
+[{'n_jobs': 1, 'univ_select': SelectPercentile(percentile=91,
+         score_func=<function f_classif at 0x10bd5bd70>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=9, whiten=False)), ('univ_select', SelectPercentile(percentile=91,
+         score_func=<function f_classif at 0x10bd5bd70>))], 'pca__n_components': 9, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=9, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10bd5bd70>, 'univ_select__percentile': 91}]
+SCALER:
+[MinMaxScaler(copy=True, feature_range=(0, 1))]
+CLASSIFIER:
+[SVC(C=230.677442765, cache_size=200, class_weight='balanced', coef0=0.0,
+  decision_function_shape=None, degree=3, gamma=0.100266991948,
+  kernel='rbf', max_iter=-1, probability=False, random_state=None,
+  shrinking=True, tol=0.001, verbose=False)]
+
+
+SVC Score:
+             precision    recall  f1-score   support
+
+    non-poi       1.00      0.81      0.89        21
+        poi       0.20      1.00      0.33         1
+
+avg / total       0.96      0.82      0.87        22
+```      
 * I use a cross-validated logistic regression classifier for my algorithm. I tried out 5 different classifiers in order to determine which ones provides the best performance. Using Sklearn's classification report to analyze the results of the 5 classifiers I found the logistic regression algorithm had the best precision and recall for identifying both poi's and non-poi's (specifically a high recall which I deemed as the more important of the two metrics in this case). The adaBoost, randomforest, gaussian naive bayes and support vector classifier algorithms all had some success at identifying poi's and non-poi's with high precision and decent recall. However none of these algorithms had as much success with precision and recall when it came to identifying poi's as the Logistic Regression. Given the choice between being especially aggressive in predicting poi's and generating lots of false positives vs. being to conservative and failing to identify known poi's I will lean towards the algorithm that successfully manages to predict most of the know poi's as poi's and generates a few more false positives as a result.  
 
 ***4. What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well?  How did you tune the parameters of your particular algorithm?*** 
