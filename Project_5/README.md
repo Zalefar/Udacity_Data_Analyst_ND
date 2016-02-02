@@ -32,8 +32,8 @@ The files contained in this directory contain all of the resources and functions
 `ec2_cluster_files/`:       
 * A directiory designed as container for all the files to be ssh'd to an AWS EC2 cluster file system for the purpose of implementing my parallelizable grid-search for hyper-parameter optimization.        
 
-`emails_by_address/`:        
-* Directory of text files containing the email messages addressed to and from the email addresses in the file names. This directory was provided by Udacity and is used in my noetbook for data description purpose and was the directory used to generate the email related to and from message features in the data set.      
+`emails_by_address.tar.gz`:        
+* Zipped directory of text files containing the email messages addressed to and from the email addresses in the file names. This directory was provided by Udacity and is used in my noetbook for data description purpose and was the directory used to generate the email related to and from message features in the data set. The directory is zipped because it contains over 1000 files.   
  
 `tools/`:       
 * Udacity provided directory containing functions that are used in the processing of the dataset into numpy arrays of features and labels.     
