@@ -1,6 +1,6 @@
 #Project 5 Identify Fraud from Enron Email   
 ###Author: Zach Farmer
-The files contained in this directory contain all of the resources and functions engaged in the pursuit of this  project. A list of files can be found below along with a brief description of their content and purpose.    
+The files contained in this directory contain all of the resources and functions utilized in the course of this project. A list of files can be found below along with a brief description of their content and purpose.    
 
 `Project_5_Machine_Learning_POI_Classifier.ipynb`:
 * IPython notebook containing the project in its entirety. All of the request components are contained within. This was done to show the flow of thought in the onstruction and completion of this project.      
@@ -53,3 +53,5 @@ The files contained in this directory contain all of the resources and functions
 `References.txt`: 
 * Text File containing the references referred to during the course of the project.    
 
+`Questions.md`:
+* A markdown file containing all of the answers to the questions provided by the Udacity Instructors in one place. These answer are the same as those found throughout the IPyhton notebook containing the project. The questions and answers are provided here to satisfy the project requirements and to provide easier access rather then requiring reviewers to work through the whole ipython notebook.     
