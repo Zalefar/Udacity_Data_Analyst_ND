@@ -194,7 +194,9 @@ if __name__=="__main__":
     ## following if statement to be run only if the optimized classifier/feature 
     ## Select pipeline object is not found in a the local directory in the pickle file. 
     ## This block of code will rerun the entire grid search and pipeline process to 
-    ## generate the content that should be available in the pickle file.
+    ## generate the content that should be available in the pickle file. All random states
+    ## have been set, theoretically the outcome should be the same each time the code is 
+    ## run
     if "Best_Classifiers.pkl" not in os.listdir('.'):    
         ## set random seed generator for the sciy.stats    
         np.random.seed(42)
@@ -220,19 +222,18 @@ if __name__=="__main__":
                                                             test_size=0.15,\
                                                             random_state=42)
         
-        ## set randomized grid search cv
+        ## set randomized grid search cross-validation method
         cv = StratifiedShuffleSplit(y_train,\
                                     n_iter = 50,\
                                     test_size = .3,\
                                     random_state=42)
-    
-        
+        ## list of classifier to compare
         classifiers = {
                    "GNB": GaussianNB(), 
                    "SVC": svm.SVC(),
                    "RDF": RandomForestClassifier(),
                    "ADB": AdaBoostClassifier(DecisionTreeClassifier(class_weight='balanced')),
-                   "LRC": LogisticRegressionCV(random_state = 42,)
+                   "LRC": LogisticRegressionCV(random_state = 42)
                        }
        
         ## dictionary of parameters for the randomized grid search cv 
@@ -267,11 +268,12 @@ if __name__=="__main__":
             pca = PCA()
             selection = SelectPercentile()
             
-            ## Note: Only implement when using randomized grid search. PCA takes a long
-            ## time to run, not a good choice with exhaustive grid search
+            ## Note to self: Only implement when using randomized grid search. 
+            ## PCA takes a long time to run, not a good choice with exhaustive 
+            ## grid search
             feature_select = FeatureUnion([("pca",pca),("univ_select",selection)])
             
-            ## Active the classifier for the current loop
+            ## Activate the classifier for the current loop
             clf = classifiers[classifier]
         
             ## Pipeline feature selection, feature scaling and classifier for optimization
@@ -292,17 +294,22 @@ if __name__=="__main__":
                                         error_score = 0,
                                         random_state = 42)
             
+            ## Save the results of the combination
             results = search.fit(X_train,y_train)
             best_classifiers[classifier] = results.best_estimator_
 
         ## Save the best classifier pipeline objects to local directory using pickle
         PickleBestClassifers(best_classifiers,"Best_Classifiers.pkl")
+    
     else:
         ## After initial run of grid search, reference the pickled outcomes for the 
         ## rest of the analysis. Actual searching process takes some time
-        ## on my system setup, so I want to run it as few times as possible. 
-        savedResults = open("Best_Classifiers_1.pkl",'r')  
+        ## on my system setup, want to run it as few times as possible. 
+        savedResults = open("Best_Classifiers.pkl",'r')  
         best_classifiers = pickle.load(savedResults)  
+
+## If the best classifier are pickled in the local directory then find only the 
+## required objects for the tester.py script.
 
 ## Remove Outliers
 data_dict = removeOutliers(data_dict,['Total'])
@@ -314,7 +321,7 @@ my_dataset = newFeatures(data_dict)
 ### The first feature must be "poi".
 features_list = generateFeaturesList(my_dataset)
 
-## Find best classifier
+## Best classifier
 clf = best_classifiers["LRC"]
 
 ### Dump classifier, dataset, and features_list so anyone can
