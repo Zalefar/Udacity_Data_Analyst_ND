@@ -13,9 +13,45 @@
 
 > <font color="red", size = 2>*What is a person of interest: Indicted, Settled without admitting guilt, Testified in exchange for immunity*</font>     
 
-*Were there any outliers in the data when you got it, and how did you handle those?*       
-* Yes there was at least one major outlier that perpetuated itself throughout the financial data. This outlier was a data point labeled "TOTAL" that upon examination of the financial data .pdf clearly represented the 'Totals' of the financial features. Clearly this data point is not a person and the information it contains already exists in each of the features by simply summing over all of their values. I chose to drop the data point itself. Further outliers may exist but may also be real data and indicative of possible fraudulent behavior. After reviewing some of the features with very large values the remaining values are not throwing any serious red flags as the 'TOTAL' data point did.
+* Summary of the data set found in the data_dict. This summary covers the original data set before prunning, additions and transformations.
+```
+Number of data points in the data_dict: 146
+Number of Features: 21
+Number of Persons of Interest in data_dict: 18
+```   
 
+* Number and Percent of missing values ('NaN's') for each feature for the full data set,
+a subset containing just the poi's and a subset of the dataset sans poi's:
+
+Number_Full | Percent_Full | Number_POI | Percent_POI | Number_sansPOI | Percent_sansPOI
+------------|--------------|------------|-------------|----------------|----------------
+ bonus | 64 | 43.84 | 2 | 11.11 | 62 | 48.44
+deferral_payments | 107 | 73.29 | 13 | 72.22 | 94 | 73.44
+deferred_income | 97 | 66.44 | 7 | 38.89 | 90 | 70.31
+director_fees | 129 | 88.36 | 18 | 100.00 | 111 | 86.72   
+email_address | 35 | 23.97 | 0 | 0.00 | 35 | 27.34
+exercised_stock_options | 44 | 30.14 | 6 | 33.33 | 38 29.69
+expenses | 51 | 34.93 | 0 | 0.00 | 51 | 39.84
+from_messages | 60 | 41.10 | 4 | 22.22 | 56 | 43.75
+from_poi_to_this_person | 60 | 41.10 | 4 | 22.22 | 56 | 43.75
+from_this_person_to_poi | 60 | 41.10 | 4 | 22.22 | 56 | 43.75
+loan_advances | 142 | 97.26 | 17 | 94.44 | 125 | 97.66
+long_term_incentive | 80 | 54.79 | 6 | 33.33 | 74 | 57.81
+other | 53 | 36.30 | 0 | 0.00 | 53 | 41.41
+poi | 0 | 0.00 | 0 | 0.00 | 0 | 0.00
+restricted_stock | 36 | 24.66 | 1 | 5.56 | 35 | 27.34
+restricted_stock_deferred | 128 | 87.67 | 18 | 100.00 | 110 | 85.94
+salary | 51 | 34.93 | 1 | 5.56 | 50 | 39.06
+shared_receipt_with_poi | 60 | 41.10 | 4 | 22.22 | 56 | 43.75
+to_messages | 60 | 41.10 | 4 | 22.22 | 56 | 43.75
+total_payments | 21 | 14.38 | 0 | 0.00 | 21 | 16.41
+total_stock_value | 20 | 13.70 | 0 | 0.00 | 20 | 15.6
+
+> A quick glance at the data suggests that a.) there is just not that much data with only 146 data points and that b.) for a many of those data points large portions of their features are missing values. There are a couple of instances where the poi data set has no values in for some of the features, specifically the directors fees and restricted stock deferred. Conversly they are some cases where all poi's have values for certain features; email addresses,  expenses, other, total payments and total stock value. However it is also true that the majority of non-poi's also have values in these categories. Clearly if we could separate the classes of the data with the existence (or non-existence) of just one feature then machine learning would not be necessary.   
+The key problem with this data set is the nominal number of data points, most machine learning algorithms performance is closely related to the quantity of data on which to train (also the quality however in our case our concern is mostly with the quantity and lack thereof). This means that the missing values are a big deal, Udacity's `featureFormat` function chooses to replace all the 'NaN' values with 0.0 and then remove any data points where all of the features are 0.0 (an additional option allows you to remove a data point that contains any 0.0 valued features--to aggressive in my opinion). There are of course problems that can arise by simply assuming that a 'NaN' can be replaced with a 0.0 without consequence. However other imputation methods are especially difficult in this case as we have so little other data from which to draw inferences in order to weigh imputation methods.
+
+*Were there any outliers in the data when you got it, and how did you handle those?*       
+* Yes there was at least one major outlier that perpetuated itself throughout the financial data. This outlier was a data point labeled "TOTAL" that upon examination of the financial data pdf clearly represented the 'Totals' of the financial features. Obviously this data point is not a person and the information it contains already exists in each of the features by simply summing over all of their values. I chose to drop the data point. 'THE TRAVEL AGENCY IN THE PARK' is not really a person and although may have been used to commit fraud it is a coporate entity and not an individual, I also dropped this data point. Reviewing some more of the extreme values in the features (values that are greater then or less then 1.5 times the I.Q.R. (inter-quartile-range) in either direction) I found at least one data point with incorrect information. According to the `enron61702insiderpay.pdf` document Bhatnagar Sanjay's total_payments are actually \$137,864, he's restricted stock is \$2,604,490 and his restricted stock deferred is \$-2,604,490. He's 'expenses' and 'other' are also switched around, he's exercised stock options should be \$15,456,290 and the total stock value is the same (\$15,456,290). I fixed these errors and not finding any more red flags in the data moved on to creating my own features. 
 
 ***2. What features did you end up using in your poi identifier, and what selection process did you use to pick them? did you have to do any scaling? why or why not? Explain what feature you tried to make, and the rationale behind it. If you used an algorithm like a decision tree, please also give the feature importances of the features that you use, and if you used an automated feature selection function like selectkbest, please report the feature scores and reasons for your choice of parameter values.***   
 ***
