@@ -47,7 +47,7 @@ to_messages | 60 | 41.10 | 4 | 22.22 | 56 | 43.75
 total_payments | 21 | 14.38 | 0 | 0.00 | 21 | 16.41
 total_stock_value | 20 | 13.70 | 0 | 0.00 | 20 | 15.6
 
-> A quick glance at the data suggests that a.) there is just not that much data with only 146 data points and that b.) for a many of those data points large portions of their features are missing values. The key problem with this data set is the nominal number of data points, most machine learning algorithms performance is closely related to the quantity of data on which to train (also the quality however in our case our concern is mostly with the quantity and lack thereof). This means that the missing values are a big deal, Udacity's `featureFormat` function chooses to replace all the 'NaN' values with 0.0 and then remove any data points where all of the features are 0.0 (an additional option allows you to remove a data point that contains any 0.0 valued features--to aggressive in my opinion). There are problems that can arise by simply assuming that a 'NaN' can be replaced with a 0.0 without consequence. However other imputation methods are especially difficult in this case as we have so little other data from which to draw inferences in order to weigh imputation methods. So keeping in mind that choosing to replace the missing values with 0's is inserting information into our model and is not innocuous I will continue with the `featureFormat` function.
+> A quick glance at the data suggests that a.) there is just not that much data with only 146 data points and that b.) for a many of those data points large portions of their features are missing values. The key problem with this data set is the nominal number of data points, most machine learning algorithms performance is closely related to the quantity of data on which to train[*"Scaling to Very Very Large Corpora for Natural Language Disambiguation"*](http://ucrel.lancs.ac.uk/acl/P/P01/P01-1005.pdf) (in addition to the quality, however in our case our concern is mostly with the quantity and lack thereof). This means that the missing values are a big deal, Udacity's `featureFormat` function chooses to replace all the 'NaN' values with 0.0 and then remove any data points where all of the features are 0.0 (an additional option allows you to remove a data point that contains any 0.0 valued features--to aggressive in my opinion). There are problems that can arise by simply assuming that a 'NaN' can be replaced with a 0.0 without consequence. However other imputation methods are especially difficult in this case as we have so little other data from which to draw inferences in order to weigh imputation methods. So keeping in mind that choosing to replace the missing values with 0's is inserting information into our model and is not innocuous I will continue with the `featureFormat` function.
 
 *Were there any outliers in the data when you got it, and how did you handle those?*       
 * Yes there was at least one major outlier that perpetuated itself throughout the financial data. This outlier was a data point labeled "TOTAL" that upon examination of the financial data pdf clearly represented the 'Totals' of the financial features. Obviously this data point is not a person and the information it contains already exists in each of the features by simply summing over all of their values. I chose to drop the data point. 'THE TRAVEL AGENCY IN THE PARK' is not really a person and although may have been used to commit fraud it is a coporate entity and not an individual, I also dropped this data point. Reviewing some more of the extreme values in the features (values that are greater then or less then 1.5 times the I.Q.R. (inter-quartile-range) in either direction) I found at least one data point with incorrect information. According to the `enron61702insiderpay.pdf` document Bhatnagar Sanjay's financial data was all switched around, I fixed these errors and not finding any more red flags in the data moved on to creating my own features. 
@@ -171,9 +171,9 @@ total_stock_value | 20 | 13.70 | 0 | 0.00 | 20 | 15.6
 ```
 Parameters for GNB
 FEATURE SELECTION:
-[{'n_jobs': 1, 'univ_select': SelectPercentile(percentile=11,
-         score_func=<function f_classif at 0x10bd5bd70>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=2, whiten=False)), ('univ_select', SelectPercentile(percentile=11,
-         score_func=<function f_classif at 0x10bd5bd70>))], 'pca__n_components': 2, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=2, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10bd5bd70>, 'univ_select__percentile': 11}]
+[{'n_jobs': 1, 'univ_select': SelectPercentile(percentile=21,
+         score_func=<function f_classif at 0x10ca48c08>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=7, whiten=False)), ('univ_select', SelectPercentile(percentile=21,
+         score_func=<function f_classif at 0x10ca48c08>))], 'pca__n_components': 7, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=7, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10ca48c08>, 'univ_select__percentile': 21}]
 SCALER:
 [MinMaxScaler(copy=True, feature_range=(0, 1))]
 CLASSIFIER:
@@ -183,16 +183,16 @@ CLASSIFIER:
 GNB Score:
              precision    recall  f1-score   support
 
-    non-poi       0.95      0.90      0.93        21
-        poi       0.00      0.00      0.00         1
+    non-poi       1.00      0.93      0.96        14
+        poi       0.50      1.00      0.67         1
 
-avg / total       0.91      0.86      0.88        22
+avg / total       0.97      0.93      0.94        15
 
 Parameters for LRC
 FEATURE SELECTION:
 [{'n_jobs': 1, 'univ_select': SelectPercentile(percentile=61,
-         score_func=<function f_classif at 0x10bd5bd70>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=22, whiten=False)), ('univ_select', SelectPercentile(percentile=61,
-         score_func=<function f_classif at 0x10bd5bd70>))], 'pca__n_components': 22, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=22, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10bd5bd70>, 'univ_select__percentile': 61}]
+         score_func=<function f_classif at 0x10ca48c08>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=22, whiten=False)), ('univ_select', SelectPercentile(percentile=61,
+         score_func=<function f_classif at 0x10ca48c08>))], 'pca__n_components': 22, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=22, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10ca48c08>, 'univ_select__percentile': 61}]
 SCALER:
 [MinMaxScaler(copy=True, feature_range=(0, 1))]
 CLASSIFIER:
@@ -205,16 +205,16 @@ CLASSIFIER:
 LRC Score:
              precision    recall  f1-score   support
 
-    non-poi       1.00      0.81      0.89        21
-        poi       0.20      1.00      0.33         1
+    non-poi       1.00      0.86      0.92        14
+        poi       0.33      1.00      0.50         1
 
-avg / total       0.96      0.82      0.87        22
+avg / total       0.96      0.87      0.89        15
 
 Parameters for RDF
 FEATURE SELECTION:
 [{'n_jobs': 1, 'univ_select': SelectPercentile(percentile=91,
-         score_func=<function f_classif at 0x10bd5bd70>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=2, whiten=False)), ('univ_select', SelectPercentile(percentile=91,
-         score_func=<function f_classif at 0x10bd5bd70>))], 'pca__n_components': 2, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=2, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10bd5bd70>, 'univ_select__percentile': 91}]
+         score_func=<function f_classif at 0x10ca48c08>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=2, whiten=False)), ('univ_select', SelectPercentile(percentile=91,
+         score_func=<function f_classif at 0x10ca48c08>))], 'pca__n_components': 2, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=2, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10ca48c08>, 'univ_select__percentile': 91}]
 SCALER:
 [MinMaxScaler(copy=True, feature_range=(0, 1))]
 CLASSIFIER:
@@ -229,16 +229,16 @@ CLASSIFIER:
 RDF Score:
              precision    recall  f1-score   support
 
-    non-poi       0.95      0.95      0.95        21
+    non-poi       0.93      1.00      0.97        14
         poi       0.00      0.00      0.00         1
 
-avg / total       0.91      0.91      0.91        22
+avg / total       0.87      0.93      0.90        15
 
 Parameters for ADB
 FEATURE SELECTION:
-[{'n_jobs': 1, 'univ_select': SelectPercentile(percentile=91,
-         score_func=<function f_classif at 0x10bd5bd70>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=2, whiten=False)), ('univ_select', SelectPercentile(percentile=91,
-         score_func=<function f_classif at 0x10bd5bd70>))], 'pca__n_components': 2, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=2, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10bd5bd70>, 'univ_select__percentile': 91}]
+[{'n_jobs': 1, 'univ_select': SelectPercentile(percentile=71,
+         score_func=<function f_classif at 0x10ca48c08>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=12, whiten=False)), ('univ_select', SelectPercentile(percentile=71,
+         score_func=<function f_classif at 0x10ca48c08>))], 'pca__n_components': 12, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=12, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10ca48c08>, 'univ_select__percentile': 71}]
 SCALER:
 [MinMaxScaler(copy=True, feature_range=(0, 1))]
 CLASSIFIER:
@@ -248,22 +248,22 @@ CLASSIFIER:
             min_samples_leaf=1, min_samples_split=2,
             min_weight_fraction_leaf=0.0, presort=False, random_state=None,
             splitter='best'),
-          learning_rate=301.824709451, n_estimators=49, random_state=None)]
+          learning_rate=87.8748897177, n_estimators=360, random_state=None)]
 
 
 ADB Score:
              precision    recall  f1-score   support
 
-    non-poi       1.00      0.86      0.92        21
-        poi       0.25      1.00      0.40         1
+    non-poi       0.92      0.86      0.89        14
+        poi       0.00      0.00      0.00         1
 
-avg / total       0.97      0.86      0.90        22
+avg / total       0.86      0.80      0.83        15
 
 Parameters for SVC
 FEATURE SELECTION:
 [{'n_jobs': 1, 'univ_select': SelectPercentile(percentile=91,
-         score_func=<function f_classif at 0x10bd5bd70>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=9, whiten=False)), ('univ_select', SelectPercentile(percentile=91,
-         score_func=<function f_classif at 0x10bd5bd70>))], 'pca__n_components': 9, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=9, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10bd5bd70>, 'univ_select__percentile': 91}]
+         score_func=<function f_classif at 0x10ca48c08>), 'pca__copy': True, 'transformer_list': [('pca', PCA(copy=True, n_components=9, whiten=False)), ('univ_select', SelectPercentile(percentile=91,
+         score_func=<function f_classif at 0x10ca48c08>))], 'pca__n_components': 9, 'pca__whiten': False, 'pca': PCA(copy=True, n_components=9, whiten=False), 'transformer_weights': None, 'univ_select__score_func': <function f_classif at 0x10ca48c08>, 'univ_select__percentile': 91}]
 SCALER:
 [MinMaxScaler(copy=True, feature_range=(0, 1))]
 CLASSIFIER:
@@ -276,17 +276,17 @@ CLASSIFIER:
 SVC Score:
              precision    recall  f1-score   support
 
-    non-poi       1.00      0.81      0.89        21
-        poi       0.20      1.00      0.33         1
+    non-poi       0.92      0.86      0.89        14
+        poi       0.00      0.00      0.00         1
 
-avg / total       0.96      0.82      0.87        22
+avg / total       0.86      0.80      0.83        15
 ```      
-* I use a cross-validated logistic regression classifier for my algorithm. I tried out 5 different classifiers in order to determine which ones provides the best performance. Using Sklearn's classification report to analyze the results of the 5 classifiers I found the logistic regression algorithm had the best precision and recall for identifying both poi's and non-poi's (specifically a high recall which I deemed as the more important of the two metrics in this case). The adaBoost, randomforest, gaussian naive bayes and support vector classifier algorithms all had some success at identifying poi's and non-poi's with high precision and decent recall. However none of these algorithms had as much success with precision and recall when it came to identifying poi's as the Logistic Regression. Given the choice between being especially aggressive in predicting poi's and generating lots of false positives vs. being to conservative and failing to identify known poi's I will lean towards the algorithm that successfully manages to predict most of the know poi's as poi's and generates a few more false positives as a result.  
+* I use a cross-validated logistic regression classifier for my algorithm. I tried out 5 different classifiers in order to determine which ones provides the best performance. Using Sklearn's classification report to analyze the results of the 5 classifiers I found that a Gaussian Naive Bayes algorithm had the best precision and recall for identifying both poi's and non-poi's (specifically a high recall which I deemed as the more important of the two metrics in this case). However testing with Udacity's `tester.py` script indicated that the Logistice Regression CV provided the best outcome. The adaBoost, randomforest, gaussian naive bayes and support vector classifier algorithms all had great success at identifying poi's and non-poi's with high precision and recall. However none of these algorithms had any success with precision and recall when it came to identifying poi's. Given the choice between being especially aggressive in predicting poi's and generating lots of false positives vs. being to conservative and failing to identify known poi's I will lean towards the algorithm that successfully manages to predict most of the know poi's as poi's and generates a few more false positives as a result.  
 
 ***4. What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well?  How did you tune the parameters of your particular algorithm?*** 
 ****
 **Answer:**        
-* Tuning of parameters is done to adjust those components of the algorithm that are associated with how the algorithm is fitting your data. To tune the parameters we have to decide on a metric of success and compare the results of that metric between different parameter values, selecting the 'tuned' parameters that offer us the best scores. These parameters have great influence over bias and variance which means that getting this step wrong can introduce high bias or high variance into our models. I chose to address the problem of tuning my parameters using a randomized cross-validated grid search over a range of values for many of my tunable parameters. This method automates the process to a degree, I still have to provide the ranges of parameters to be tested. The model I used implemented a tuned feature selection algorithm, a tuned pca and a tuned logistic regression classifier. Essentially I perturbed the number of features to included, varied the number of principle components to included and finally adjusted the strength of the regularization term in the classifier. By performing all these steps I was able to tune my entire model to relatively descent success in identifying poi's and non-poi's    
+* Tuning of parameters is done to adjust those components of the algorithm that are associated with how the algorithm is fitting your data. To tune the parameters we have to decide on a metric of success and compare the results of that metric between different parameter values, selecting the 'tuned' parameters that offer us the best scores. These parameters have great influence over bias and variance which means that getting this step wrong can introduce high bias or high variance into our models. I chose to address the problem of tuning my parameters using a randomized cross-validated grid search over a range of values for many of my tunable parameters. This method automates the process to a degree, I still have to provide the ranges of parameters to be tested. The model I used implemented a tuned feature selection algorithm, a tuned pca and a tuned logistic regression classifier. Essentially I perturbed the number of features to included, varied the number of principle components to included and finally adjusted the strength of the regularization term in the classifier. By performing all these steps I was able to tune my entire model to achieve relatively descent success in identifying poi's and non-poi's    
 
 ***5. What is validation, and what’s a classic mistake you can make if you do it wrong? How did you validate your analysis?***  
 ****
@@ -300,11 +300,11 @@ avg / total       0.96      0.82      0.87        22
 Logistic Regression Classifier Report:
              precision    recall  f1-score   support
 
-    non-poi       1.00      0.81      0.89        21
-        poi       0.20      1.00      0.33         1
+    non-poi       1.00      0.86      0.92        14
+        poi       0.33      1.00      0.50         1
 
-avg / total       0.96      0.82      0.87        22
+avg / total       0.96      0.87      0.89        15
 ```    
 > NOTE: The following answer is based on my results from testing on my holdout test set. The results from the `tester.py` are different, however the essence of the results are the same. The test set uses more 'support' data points both non-poi and poi so the extremes in my results, the 100%, are mellowed out to much lower then 100%. That being said the result are proportionally very similar between my test data and the `tester.py` outcome.    
 
-***Answer:*** The classification report above tells us a few important things about the model's performance. The precision metric is indicating the percentage of relevant (that is positive and correct) predictions made by the model over all the positive predictions made by the model (correct or incorrect). In other words how many of the positive predictions made by the model are actually relevant (positive and correct) when compared to ground truth reality. Recall on the other hand compares the number of relevant (positive and correct) predictions made by the model vs. the total number of relevant (positive and correct) values that actually exist in ground truth reality. In other words how many of the real relevant (positive and correct) ground truth values does our model identify compared to the total number that actually exists. The classification report above further breaks down the precision and recall for each of the possible labels non-poi and poi. Given this information we can say that according to this classification report our model does an excellent job of correctly identifying all non-poi's labels (perfect 100% of predictions are in reality correct) and less success with poi's (only 33% of are predicted positive labels are in reality actually real pois) when it makes such a prediction. Our model however has more success when it comes to correctly identifying all the actual poi (positive and correct) labels that exist in the test set data (100% perfect capture of all the possible positive poi labels that can be found in the test data set). We can see that it identifies most of the non-pois that can be found in reality in the test data set. Although this model is more likely to cause a greater workload for those tasked with looking into the individuals, as a result fo flagging more poi's than actually exist, the trade-off is in my mind worth it. I am more biased towards an algorithm that will correctly identify all of the poi's that do exist in reality even if it means flagging more innocent individuals for further scrutiny. 
+***Answer:*** The classification report above tells us a few important things about the model's performance. The precision metric is indicating the percentage of relevant (that is positive and correct) predictions made by the model over all the positive predictions made by the model (correct or incorrect). In other words how many of the positive predictions made by the model are actually relevant (positive and correct) when compared to ground truth reality. Recall on the other hand compares the number of relevant (positive and correct) predictions made by the model vs. the total number of relevant (positive and correct) values that actually exist in reality. In other words how many of the real relevant (positive and correct) ground truth values does our model identify compared to the total number that actually exists. The classification report above further breaks down the precision and recall for each of the possible labels non-poi and poi. Given this information we can say that according to this classification report our model does an excellent job of correctly identifying all non-poi's labels (perfect 100% of predictions are in reality correct) and less success with poi's (only 33% of are predicted positive labels are in reality actually real pois). Our model however has more success when it comes to correctly identifying all the actual poi (positive and correct) labels that exist in the test set data (100% perfect capture of all the possible positive poi labels that can be found in the test data set). We can see that it identifies most of the non-pois that can be found in the test data set. Although this model is more likely to cause a greater workload for those tasked with looking into the individuals, as a result of predicting more poi's than actually exist, the trade-off is in my mind worth it. I am more biased towards an algorithm that will correctly identify all of the poi's that do exist in reality even if it means flagging more innocent individuals for further scrutiny. 
