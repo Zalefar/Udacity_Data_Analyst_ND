@@ -572,7 +572,7 @@ IPython.load_extensions('calico-spell-check')
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span class="c">#!/anaconda/bin/python </span>
@@ -607,23 +607,24 @@ IPython.load_extensions('calico-spell-check')
     
     <span class="k">return</span> <span class="p">(</span><span class="n">enron_df</span><span class="p">,</span> <span class="n">poi_df</span><span class="p">)</span> 
 
-<span class="k">def</span> <span class="nf">data_set_overview</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">data_set_overview</span><span class="p">(</span><span class="n">data_dictionary</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print out overview statistics </span>
 <span class="sd">        </span>
 <span class="sd">        Parameters: </span>
-<span class="sd">            values = Values for the keys (data points, persons&#39;s)</span>
-<span class="sd">            in the dataset dictionary (data_dict)</span>
+<span class="sd">            data_dictionary = Dataset dictionary (data_dict)</span>
 <span class="sd">    </span>
 <span class="sd">        Output: </span>
 <span class="sd">            Big picture overview of the data set. To include</span>
 <span class="sd">        total number of data points. Total number of features and </span>
 <span class="sd">        total number of persons of interest.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">## Find total number of uniques features for the financial data</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data_dictionary</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
     <span class="k">print</span> <span class="s">&quot;Number of data points in the data_dict: {0}&quot;</span><span class="o">.</span>\
-    <span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>   
+    <span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_dictionary</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>   
     <span class="k">print</span> <span class="s">&quot;Number of Features: {0}&quot;</span><span class="o">.</span>\
-    <span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">values</span><span class="p">)))</span>
+    <span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">features</span><span class="p">)))</span>
     <span class="k">print</span> <span class="s">&quot;Number of Persons of Interest in data_dict: {0}&quot;</span><span class="o">.</span>\
     <span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">person</span><span class="p">[</span><span class="s">&#39;poi&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">person</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
 
@@ -679,7 +680,7 @@ IPython.load_extensions('calico-spell-check')
     <span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
     
     <span class="c">## Overview of data set</span>
-    <span class="n">data_set_overview</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+    <span class="n">data_set_overview</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
     
     <span class="c">## Find total number of POI&#39;s from provided txt file</span>
 <span class="c">#     c = !awk &#39;{for(i=1;i&lt;=NF;i++){if($i~/^\(/){print $i}}}&#39; poi_names.txt | wc -l</span>
@@ -5572,7 +5573,7 @@ None
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Question-1--Part-2:">Question 1--Part 2:<a class="anchor-link" href="#Question-1--Part-2:">&#182;</a></h3><p><strong><em>Were there any outliers in the data when you got it, and how did you handle those?</em></strong><br>
-<strong><em>Answer:</em></strong> Yes there was at least one major outlier that perpetuated itself throughout the financial data. This outlier was a data point labeled "TOTAL" that upon examination of the financial data .pdf clearly represented the 'Totals' of the financial features. Clearly this data point is not a person and the information it contains already exists in each of the features by simply summing over all of their values. I chose to drop the data point itself. 'THE TRAVEL AGENCY IN THE PARK' is not really a person and although may have been used to commit fraud it is a coporate entity and not an individual, I also dropped this data point. Further outliers may exist but may also be real data and indicative of possible fraudulent behavior. After reviewing some of the features with very large values the remaining values are not throwing any serious red flags as the 'TOTAL' data point did.</p>
+<strong><em>Answer:</em></strong> Yes there was at least one major outlier that perpetuated itself throughout the financial data. This outlier was a data point labeled "TOTAL" that upon examination of the financial data pdf clearly represented the 'Totals' of the financial features. Obviously this data point is not a person and the information it contains already exists in each of the features by simply summing over all of their values. I chose to drop the data point. 'THE TRAVEL AGENCY IN THE PARK' is not really a person and although may have been used to commit fraud it is a coporate entity and not an individual, I also dropped this data point. Reviewing some more of the extreme values in the features (values that are greater then or less then 1.5 times the I.Q.R. (inter-quartile-range) from the top and bottom of the I.Q.R.) I found at least one data point with incorrect information. According to the <code>enron61702insiderpay.pdf</code> document Bhatnagar Sanjay's financial data was all switched around, I fixed these errors and not finding any more red flags in the data moved on to creating my own features.</p>
 
 </div>
 </div>
@@ -6497,7 +6498,9 @@ For the top 22 principle components I used sklearn&apos;s PCA fit_transform.
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Engineer your own feature that does not come ready-made in the dataset -- explain what feature you tried to make, and the rationale behind it.</strong><br>
-<strong><em>Answer:</em></strong> I felt that Katie's (Udacity Intro to Machine Learning course co-instructor) idea of generating features that measured the frequency of communications both to and from known POIs was an excellent idea. This method of utilizing the emails allows us to gather some of the information available in the email corpus without trying to engineer methods of including the actual content of the emails in the same dataset as the financial data, this spared me from the trouble of combining two different datasets, which did not contain all of the same data points. Furthermore Katie's idea of a shared receipt also resonated with me as an excellent method of capturing second degree associations with POIs. After implementing the fraction_to and fraction_from this person to POI and the shared receipt feature I engineered two other features. Salary to total payment ratio and salary to total stock value ratio. These features were engineered on the hypothesis that an individual is most likely to commit fraud because they are receiving some sort of benefit from doing so. In other words it is a risk and reward trade-off and my theory was that individuals committing fraud would show a lower ratio of salary to total compensation metrics. In other words two people in similar professional standings with fairly similar base salaries should show differences in total compensation metrics. In the case of an individual committing fraud they would be more likely to receive financial gains as a result of their fraudulently attained success in the form of some type 'bonus' compensation and therefore they should present higher total payments and total stock values and consequently a lower ratio of salary to those metrics. My engineered features did not make it past the feature selection stage, unless you count them as possibly being included in the top principle components. I believe that because many of the key individuals involved in the fraud were at the very top of the company and those individuals naturally receive total compensation far in excess of their base salaries the information I was hoping to discover in the data wasn't very distinctive.</p>
+<strong><em>Answer:</em></strong> I felt that Katie's (Udacity Intro to Machine Learning course co-instructor) idea of generating features that measured the frequency of communications both to and from known POIs was an excellent idea. This method of utilizing the emails allows us to gather some of the information available in the email corpus without trying to engineer methods of including the actual content of the emails in the same dataset as the financial data, this spared me from the trouble of combining two different datasets, which did not contain all of the same data points. Furthermore Katie's idea of a shared receipt also resonated with me as an excellent method of capturing second degree associations with POIs. After implementing the fraction_to and fraction_from this person to POI* and the shared receipt feature I engineered two other features. Salary to total payment ratio and salary to total stock value ratio. These features were engineered on the hypothesis that an individual is most likely to commit fraud because they are receiving some sort of benefit from doing so. In other words it is a risk and reward trade-off and my theory was that individuals committing fraud would show a lower ratio of salary to total compensation metrics. In other words two people in similar professional standings with fairly similar base salaries should show differences in total compensation metrics. In the case of an individual committing fraud they would be more likely to receive financial gains as a result of their fraudulently attained success in the form of some type 'bonus' compensation and therefore they should present higher total payments and total stock values and consequently a lower ratio of salary to those metrics. My engineered features did not make it past the feature selection stage, unless you count them as possibly being included in the top principle components. I believe that because many of the key individuals involved in the fraud were at the very top of the company and those individuals naturally receive total compensation far in excess of their base salaries the information I was hoping to discover in the data wasn't very distinctive.</p>
+<blockquote><p>*Including these features does introduce some data leakage into the validation set. The validation test data will have some connection to ground truth values, i.e. knows what email addresses are ground truth poi's.</p>
+</blockquote>
 
 </div>
 </div>
@@ -6621,6 +6624,49 @@ The variance explained by the top 22 components of the PCA:
  (20, 1.5071393030939921e-14),
  (21, 1.3600895757998964e-16),
  (22, 8.2573694413750787e-17)]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span class="c">## Final dataset overview   </span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;final_project_dataset.pkl&quot;</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">data_file</span><span class="p">:</span>
+        <span class="n">data_dict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span>
+        
+<span class="c">## Add new feature to my dataset</span>
+<span class="n">my_dataset</span> <span class="o">=</span> <span class="n">newFeatures</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span> 
+    
+<span class="c">## Remove outliers</span>
+<span class="n">my_dataset</span> <span class="o">=</span> <span class="n">removeOutliers</span><span class="p">(</span><span class="n">my_dataset</span><span class="p">,[</span><span class="s">&#39;TOTAL&#39;</span><span class="p">,</span><span class="s">&#39;THE TRAVEL AGENCY IN THE PARK&#39;</span><span class="p">])</span>
+    
+<span class="c">## Fix bad financial data</span>
+<span class="n">my_dataset</span> <span class="o">=</span> <span class="n">fixFinancialData</span><span class="p">(</span><span class="n">my_dataset</span><span class="p">)</span>
+               
+<span class="n">data_set_overview</span><span class="p">(</span><span class="n">my_dataset</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Number of data points in the data_dict: 145
+Number of Features: 25
+Number of Persons of Interest in data_dict: 18
 </pre>
 </div>
 </div>
