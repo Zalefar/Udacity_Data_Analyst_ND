@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #Author: Zach Farmer
-#Purpose: Parallelize algorithm and feature selection paramter grid search.
+#Purpose: Parallelize algorithm and feature selection with paramter grid search.
 #Use numpy memarrays and Ipython Parallel run on AWS EC2 using StarCluster.   
 
 """
@@ -11,10 +11,24 @@
     for implementing my gridsearch optimization in parallel. For those 
     interested you can find the notebooks and link to the tutorial at the 
     following github: https://github.com/ogrisel/parallel_ml_tutorial/
+    
+    some of the functions are adaptations of the code found in that tutorial.
+    The code block was designed to be uploaded to a starcluster intialized ec2
+    instance. (I hade trouble getting this code to work quickly on the ec2 instance,
+    not sure why as the environment should be identical to my machine, just 
+    with more cores. Regardless the distribution of computations didn't seem to 
+    speed up the process, and I had to ditch the pca which basically caused the 
+    computations to stall indefinitely) 
 """
 import sys
+import numpy as np
+import os
+import time
+import pickle
+import re
+
 from pprint import pprint
-from create_my_dataset import newFeatures, dropFeatures
+from create_my_dataset import newFeatures, dropFeatures, removeOutliers, fixFinancialData
 from feature_format import featureFormat, targetFeatureSplit  
 
 from sklearn.feature_selection import SelectPercentile, f_classif
@@ -33,14 +47,9 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.linear_model import LogisticRegressionCV
 
-import numpy as np
-import os
-import time
-import pickle
-import re
 
-
-##Create persistent Cross-validated training and test dataset using joblib
+## Create Cross-validated training and test dataset using joblib
+## borrowers heavily for Oliver grisels example
 def persist_cv_splits(X, y, n_cv_splits = 14, filename="data",
                       suffix = "_cv_%03d.pkl", test_size=.1,
                       random_state=42):
@@ -118,7 +127,6 @@ def compute_evaluation(cv_split_filename, model, params):
         cv_split_filename, mmap_mode='c')  
     
     ## Feature selection method, same for all classifiers
-    
     selection = SelectPercentile()        
     
     ## Pipeline the feature selection, feature scaling and classifier for optimization
@@ -128,6 +136,7 @@ def compute_evaluation(cv_split_filename, model, params):
                         ("scaler", MinMaxScaler()),
                         (model[0],model[1])
                         ])
+    
     # set model parameters
     pipeline.set_params(**params)  
     # train the model
@@ -213,29 +222,37 @@ if __name__ =="__main__":
     with open("final_project_dataset.pkl", "r") as data_file:
         data_dict = pickle.load(data_file)
     
-    ## Create new features 
+    ## set random seed generator for the sciy.stats    
+    np.random.seed(42)
+
+    ## Add new feature to my dataset
     my_dataset = newFeatures(data_dict) 
     
+    ## Remove outliers
+    my_dataset = removeOutliers(my_dataset,['TOTAL','THE TRAVEL AGENCY IN THE PARK'])
+    
+    ## Fix bad financial data
+    my_dataset = fixFinancialData(my_dataset)
+               
     ## Find unique features in my_dataset
     features = [value for value in my_dataset.itervalues() for value in value.keys()]
     unique_features = list(set(features))
-    
-    ## Remove non-numeric features (email_address)
-    reduced_features = dropFeatures(unique_features, ['email_address'])
-
+                                
+    ## Remove non-numeric features, return feature list (email_address)
+    features_list = dropFeatures(unique_features, ['email_address'])
+                                                      
     ## Method for moving an item in a list to a new position found at:
     ## http://stackoverflow.com/questions/3173154/move-an-item-inside-a-list
     ## posted by nngeek
     ## ensure that 'poi' is the first value in the feature list
     try:
-        reduced_features.remove('poi')
-        reduced_features.insert(0, 'poi')
+      features_list.remove('poi')
+      features_list.insert(0, 'poi')
     except ValueError:
-        pass
+      pass
 
-    ## Extract features and labels from dataset
-    data = featureFormat(my_dataset, reduced_features, sort_keys=True)
-    ## Return as numpy arrays    
+    ### Extract features and labels convert to numpy arrays
+    data = featureFormat(my_dataset, features_list, sort_keys=True)
     labels, numpy_features = targetFeatureSplit(data)
     
     ## Create training and test splits on all of the features, feature 
@@ -320,6 +337,6 @@ if __name__ =="__main__":
         ## After initial run of grid search, reference the pickled outcomes for the 
         ## rest of the analysis. Actual searching process takes a while
         ## on my system setup, so I want to run it as few times as possible. 
-        savedResults = open("Best_Trained_Classifiers.pkl",'r')  
+        savedResults = open("Best_Classifiers.pkl",'r')  
         best_classifiers = pickle.load(savedResults)
         

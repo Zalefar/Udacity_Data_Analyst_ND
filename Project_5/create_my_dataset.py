@@ -16,6 +16,14 @@
     Function for generating new features provided. This function implements hard 
     coded features. It is not abstractable for the creation of any other features 
     as written.  
+    
+    Function for removing outliers found in the dataset, it can except a list of 
+    datapoints to remove.
+    
+    Function for correcting financial data for one of the persons in the data set.
+    This function is hard-coded and cannot be abstracted for use on other persons,
+    and features.
+    
 """   
 
 def dropFeatures(features, remove_list):
@@ -67,8 +75,14 @@ def newFeatures(data_dict):
         Output: 
             data_dict with new features (hard-coded)
     """
-    ## following is not extensible or abstractable to making any other features 
+    ## following is not extensible to making any other features 
     ## then what is hard coded below.
+
+    ## Note: Some of the following features are susceptible to data leakage.
+    ## The features which inlcude the links to poi's through emails mean that 
+    ## the test data potentially inlcudes ground truth information of actual poi's.
+    ## potentially inlcudes ground truth information of actual poi's. 
+
     for name in data_dict:
 
         from_poi_to_this_person = data_dict[name]["from_poi_to_this_person"]
@@ -97,3 +111,44 @@ def newFeatures(data_dict):
         data_dict[name]['salary_to_stockValue_ratio'] = salary_to_stockValue_ratio
         
     return data_dict   
+
+def removeOutliers(data_dictionary, list_data_points):
+    """
+        remove the data points associated with any discovered outliers
+        
+        Parameters:
+            data_dictionay = The Udacity provided data set data_dict or my_dataset.
+            data_point_name = The key name for the datapoint containing
+            outliers. (e.g. 'Total'). 
+        Output:
+            data_dictionary with the provided data point removed from the 
+            dictionary.
+    """
+    for elem in list_data_points:
+        try:
+            data_dictionary.pop(elem,0)
+            return data_dictionary
+        except ValueError:
+            print "data_point not found in data_dict."
+            pass 
+    
+    return None
+
+def fixFinancialData(data_dictionary):
+    """
+        Fix the financial data mistake for 'BHATNAGAR SANJAY'
+        Parameters:
+            data_dictionary: Python dictionary containing the data set 
+        Output:
+            Pythin dictionary containing the data set with 'BHATNAGAR SANJAY'
+        financial data corrected
+    """
+    data_dictionary['BHATNAGAR SANJAY']['total_payments'] = 137864
+    data_dictionary['BHATNAGAR SANJAY']['restricted_stock'] = 2604490
+    data_dictionary['BHATNAGAR SANJAY']['restricted_stock_deferred'] = -2604490
+    data_dictionary['BHATNAGAR SANJAY']['expenses'] = 137864
+    data_dictionary['BHATNAGAR SANJAY']['other'] = 'NaN'
+    data_dictionary['BHATNAGAR SANJAY']['exercised_stock_options'] = 15456290
+    data_dictionary['BHATNAGAR SANJAY']['total_stock_value'] = 15456290
+    
+    return data_dictionary

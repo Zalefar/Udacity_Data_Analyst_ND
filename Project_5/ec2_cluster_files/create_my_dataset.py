@@ -4,8 +4,8 @@
 """
     Functions for creating my own dataset from the provided data_dict.
     
-    Function for dropping features by hand are provided, chiefly for the 
-    removal of the non-numeric feature of email-address. While one could 
+    Function for dropping features by hand, chiefly for the 
+    removal of the non-numeric feature 'email_address'. One could 
     certainly manually remove other variables to perform feature selection
     It is recommended that a more analytical approach be taken using sklearn's
     feature selection methods. 
@@ -13,12 +13,20 @@
     Function for computing fraction between two features provided. For the purpose
     of creating new features based on ratios. 
     
-    Function for generating new features provided. This function has hand coded 
-    features. It is not abstractable for the creation of any other features as 
-    written.  
+    Function for generating new features provided. This function implements hard 
+    coded features. It is not abstractable for the creation of any other features 
+    as written.  
+    
+    Function for removing outliers found in the dataset, it can except a list of 
+    datapoints to remove.
+    
+    Function for correcting financial data for one of the persons in the data set.
+    This function is hard-coded and cannot be abstracted for use on other persons,
+    and features.
+    
 """   
 
-def dropFeatures(features,remove_list):
+def dropFeatures(features, remove_list):
     """
         Parameters: 
             features = Python list of unique features in the data_dict. 
@@ -26,8 +34,8 @@ def dropFeatures(features,remove_list):
             non-numeric features such as the email address) 
     
         Output: 
-            Python list of unique features to be used in the feature 
-            selection process. 
+            Python list of unique features sans the features in the remove
+            list. 
     """   
     ## Method courtesy of user: Donut at: 
     ## http://stackoverflow.com/questions/4211209/remove-all-the-elements-that-occur-in-one-list-from-another
@@ -91,9 +99,50 @@ def newFeatures(data_dict):
         data_dict[name]['salary_to_totalPayment_ratio'] = salary_to_totalPayment_ratio
         
         salary = data_dict[name]['salary']
-        total_stock_value = data_dict[name]['total_stock_value'] 
-        salary_to_totalStockValue_ratio = computeFraction(salary, total_stock_value)
+        total_stock = data_dict[name]['total_stock_value'] 
+        salary_to_stockValue_ratio = computeFraction(salary, total_stock)
         
-        data_dict[name]['salary_to_totalStockValue_ratio'] = salary_to_totalStockValue_ratio
+        data_dict[name]['salary_to_stockValue_ratio'] = salary_to_stockValue_ratio
         
     return data_dict   
+
+def removeOutliers(data_dictionary, list_data_points):
+    """
+        remove the data points associated with any discovered outliers
+        
+        Parameters:
+            data_dictionay = The Udacity provided data set data_dict or my_dataset.
+            data_point_name = The key name for the datapoint containing
+            outliers. (e.g. 'Total'). 
+        Output:
+            data_dictionary with the provided data point removed from the 
+            dictionary.
+    """
+    for elem in list_data_points:
+        try:
+            data_dictionary.pop(elem,0)
+            return data_dictionary
+        except ValueError:
+            print "data_point not found in data_dict."
+            pass 
+    
+    return None
+
+def fixFinancialData(data_dictionary):
+    """
+        Fix the financial data mistake for 'BHATNAGAR SANJAY'
+        Parameters:
+            data_dictionary: Python dictionary containing the data set 
+        Output:
+            Pythin dictionary containing the data set with 'BHATNAGAR SANJAY'
+        financial data corrected
+    """
+    data_dictionary['BHATNAGAR SANJAY']['total_payments'] = 137864
+    data_dictionary['BHATNAGAR SANJAY']['restricted_stock'] = 2604490
+    data_dictionary['BHATNAGAR SANJAY']['restricted_stock_deferred'] = -2604490
+    data_dictionary['BHATNAGAR SANJAY']['expenses'] = 137864
+    data_dictionary['BHATNAGAR SANJAY']['other'] = 'NaN'
+    data_dictionary['BHATNAGAR SANJAY']['exercised_stock_options'] = 15456290
+    data_dictionary['BHATNAGAR SANJAY']['total_stock_value'] = 15456290
+    
+    return data_dictionary

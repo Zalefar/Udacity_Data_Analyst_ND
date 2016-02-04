@@ -11,9 +11,10 @@ import re
 import scipy.stats as sp
 
 from pprint import pprint
-from create_my_dataset import newFeatures, dropFeatures
+from create_my_dataset import newFeatures, dropFeatures, removeOutliers, fixFinancialData
 sys.path.append("tools/")
 from feature_format import featureFormat, targetFeatureSplit  
+from tester import dump_classifier_and_data   
 
 from sklearn.feature_selection import SelectPercentile, f_classif
 from sklearn.preprocessing import MinMaxScaler
@@ -201,30 +202,46 @@ if __name__=="__main__":
         ## set random seed generator for the sciy.stats    
         np.random.seed(42)
 
-        ## Remove Outliers
-        data_dict = removeOutliers(data_dict,['Total'])
-        
-        ## Create new features 
+        ## Add new feature to my dataset
         my_dataset = newFeatures(data_dict) 
-        
-        ## Generate the feature list for featureFormat
-        reduced_features = generateFeaturesList(my_dataset)
-        
-        ## Extract features and labels from dataset
-        data = featureFormat(my_dataset, reduced_features, sort_keys=True)
-        ## Return as numpy arrays    
-        labels, numpy_features = targetFeatureSplit(data)
+    
+        ## Remove outliers
+        my_dataset = removeOutliers(my_dataset,['TOTAL','THE TRAVEL AGENCY IN THE PARK'])
+    
+        ## Fix bad financial data
+        my_dataset = fixFinancialData(my_dataset)
+               
+        ## Find unique features in my_dataset
+        features = [value for value in my_dataset.itervalues() for value in value.keys()]
+        unique_features = list(set(features))
+                                
+        ## Remove non-numeric features, return feature list (email_address)
+        features_list = dropFeatures(unique_features, ['email_address'])
+                                                      
+        ## Method for moving an item in a list to a new position found at:
+        ## http://stackoverflow.com/questions/3173154/move-an-item-inside-a-list
+        ## posted by nngeek
+        ## ensure that 'poi' is the first value in the feature list
+        try:
+            features_list.remove('poi')
+            features_list.insert(0, 'poi')
+        except ValueError:
+            pass
 
+        ### Extract features and labels convert to numpy arrays
+        data = featureFormat(my_dataset, features_list, sort_keys=True)
+        labels, numpy_features = targetFeatureSplit(data)
+        
         ## Create training and test splits on all of the features, feature 
         ## selection to be performed in the pipeline 
         X_train, X_test, y_train, y_test = train_test_split(numpy_features,\
                                                             labels,\
-                                                            test_size=0.15,\
+                                                            test_size=0.1,\
                                                             random_state=42)
         
         ## set randomized grid search cross-validation method
         cv = StratifiedShuffleSplit(y_train,\
-                                    n_iter = 50,\
+                                    n_iter = 30,\
                                     test_size = .3,\
                                     random_state=42)
         
