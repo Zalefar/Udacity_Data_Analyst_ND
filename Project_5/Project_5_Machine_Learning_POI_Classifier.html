@@ -174,7 +174,7 @@ div#notebook {
 
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span class="c">#%%javascript</span>
@@ -5605,164 +5605,163 @@ process as closely as possible using the learned parameters and to elucidate on 
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="c"># %%writefile create_my_dataset.py</span>
-<span class="c"># #!/usr/bin/python</span>
-<span class="c"># #Author: Zach Farmer</span>
-<span class="c"># #Purpose: Create my own dataset from provided data_dict </span>
-<span class="c"># &quot;&quot;&quot;</span>
-<span class="c">#     Functions for creating my own dataset from the provided data_dict.</span>
+<div class=" highlight hl-ipython2"><pre><span class="o">%%</span><span class="k">writefile</span> create_my_dataset.py
+#!/usr/bin/python
+#Author: Zach Farmer
+#Purpose: Create my own dataset from provided data_dict 
+&quot;&quot;&quot;
+    Functions for creating my own dataset from the provided data_dict.
     
-<span class="c">#     Function for dropping features by hand, chiefly for the </span>
-<span class="c">#     removal of the non-numeric feature &#39;email_address&#39;. One could </span>
-<span class="c">#     certainly manually remove other variables to perform feature selection</span>
-<span class="c">#     It is recommended that a more analytical approach be taken using sklearn&#39;s</span>
-<span class="c">#     feature selection methods. </span>
+    Function for dropping features by hand, chiefly for the 
+    removal of the non-numeric feature &#39;email_address&#39;. One could 
+    certainly manually remove other variables to perform feature selection
+    It is recommended that a more analytical approach be taken using sklearn&#39;s
+    feature selection methods. 
 
-<span class="c">#     Function for computing fraction between two features provided. For the purpose</span>
-<span class="c">#     of creating new features based on ratios. </span>
+    Function for computing fraction between two features provided. For the purpose
+    of creating new features based on ratios. 
     
-<span class="c">#     Function for generating new features provided. This function implements hard </span>
-<span class="c">#     coded features. It is not abstractable for the creation of any other features </span>
-<span class="c">#     as written.  </span>
+    Function for generating new features provided. This function implements hard 
+    coded features. It is not abstractable for the creation of any other features 
+    as written.  
     
-<span class="c">#     Function for removing outliers found in the dataset, it can except a list of </span>
-<span class="c">#     datapoints to remove.</span>
+    Function for removing outliers found in the dataset, it can except a list of 
+    datapoints to remove.
     
-<span class="c">#     Function for correcting financial data for one of the persons in the data set.</span>
-<span class="c">#     This function is hard-coded and cannot be abstracted for use on other persons,</span>
-<span class="c">#     and features.</span>
+    Function for correcting financial data for one of the persons in the data set.
+    This function is hard-coded and cannot be abstracted for use on other persons,
+    and features.
     
-<span class="c"># &quot;&quot;&quot;   </span>
+&quot;&quot;&quot;   
 
-<span class="c"># def dropFeatures(features, remove_list):</span>
-<span class="c">#     &quot;&quot;&quot;</span>
-<span class="c">#         Parameters: </span>
-<span class="c">#             features = Python list of unique features in the data_dict. </span>
-<span class="c">#             remove_list = Python list of features to be removed.(drop </span>
-<span class="c">#             non-numeric features such as the email address) </span>
+def dropFeatures(features, remove_list):
+    &quot;&quot;&quot;
+        Parameters: 
+            features = Python list of unique features in the data_dict. 
+            remove_list = Python list of features to be removed.(drop 
+            non-numeric features such as the email address) 
     
-<span class="c">#         Output: </span>
-<span class="c">#             Python list of unique features sans the features in the remove</span>
-<span class="c">#             list. </span>
-<span class="c">#     &quot;&quot;&quot;   </span>
-<span class="c">#     ## Method courtesy of user: Donut at: </span>
-<span class="c">#     ## http://stackoverflow.com/questions/4211209/remove-all-the-elements-that-occur-in-one-list-from-another</span>
-<span class="c">#     features_remove = remove_list</span>
-<span class="c">#     learning_features = [feature for feature in features if feature not in features_remove]</span>
+        Output: 
+            Python list of unique features sans the features in the remove
+            list. 
+    &quot;&quot;&quot;   
+    ## Method courtesy of user: Donut at: 
+    ## http://stackoverflow.com/questions/4211209/remove-all-the-elements-that-occur-in-one-list-from-another
+    features_remove = remove_list
+    learning_features = [feature for feature in features if feature not in features_remove]
     
-<span class="c">#     return learning_features</span>
+    return learning_features
 
-<span class="c"># ## Following code adapted from Udacity&#39;s Intro to Machine learning lesson 11 Visualizing</span>
-<span class="c"># ## Your New Feature Quiz</span>
-<span class="c"># def computeFraction(feature_1, feature_2 ):</span>
-<span class="c">#     &quot;&quot;&quot; </span>
-<span class="c">#         Parameters: </span>
-<span class="c">#             Two numeric feature vectors for which we want to compute a ratio</span>
-<span class="c">#             between</span>
+## Following code adapted from Udacity&#39;s Intro to Machine learning lesson 11 Visualizing
+## Your New Feature Quiz
+def computeFraction(feature_1, feature_2 ):
+    &quot;&quot;&quot; 
+        Parameters: 
+            Two numeric feature vectors for which we want to compute a ratio
+            between
      
-<span class="c">#         Output: </span>
-<span class="c">#             Return fraction or ratio of feature_1 divided by feature_2</span>
-<span class="c">#     &quot;&quot;&quot;</span>
+        Output: 
+            Return fraction or ratio of feature_1 divided by feature_2
+    &quot;&quot;&quot;
     
-<span class="c">#     fraction = 0.</span>
+    fraction = 0.
     
-<span class="c">#     if feature_1 == &quot;NaN&quot;:  </span>
-<span class="c">#         fraction = 0.0</span>
-<span class="c">#     elif feature_2 == &quot;NaN&quot;:</span>
-<span class="c">#         fraction = 0.0</span>
-<span class="c">#     else: </span>
-<span class="c">#         fraction = int(feature_1) / float(feature_2)</span>
+    if feature_1 == &quot;NaN&quot;:  
+        fraction = 0.0
+    elif feature_2 == &quot;NaN&quot;:
+        fraction = 0.0
+    else: 
+        fraction = int(feature_1) / float(feature_2)
 
-<span class="c">#     return fraction</span>
+    return fraction
      
-<span class="c"># def newFeatures(data_dict):</span>
-<span class="c">#     &quot;&quot;&quot;</span>
-<span class="c">#         Parameters: </span>
-<span class="c">#             data_dict provided by Udacity instructors   </span>
+def newFeatures(data_dict):
+    &quot;&quot;&quot;
+        Parameters: 
+            data_dict provided by Udacity instructors   
     
-<span class="c">#         Output: </span>
-<span class="c">#             data_dict with new features (hard-coded)</span>
-<span class="c">#     &quot;&quot;&quot;</span>
-<span class="c">#     ## following is not extensible to making any other features </span>
-<span class="c">#     ## then what is hard coded below.</span>
+        Output: 
+            data_dict with new features (hard-coded)
+    &quot;&quot;&quot;
+    ## following is not extensible to making any other features 
+    ## then what is hard coded below.
 
-<span class="c">#     ## Note: Some of the following features are susceptible to data leakage.</span>
-<span class="c">#     ## The features which inlcude the links to poi&#39;s through emails mean that </span>
-<span class="c">#     ## the test data potentially inlcudes ground truth information of actual poi&#39;s.</span>
-<span class="c">#     ## potentially inlcudes ground truth information of actual poi&#39;s. </span>
+    ## Note: Some of the following features are susceptible to data leakage.
+    ## The features which inlcude the links to poi&#39;s through emails mean that 
+    ## the test data potentially inlcudes ground truth information of actual poi&#39;s.
+    ## potentially inlcudes ground truth information of actual poi&#39;s. 
 
-<span class="c">#     for name in data_dict:</span>
+    for name in data_dict:
 
-<span class="c">#         from_poi_to_this_person = data_dict[name][&quot;from_poi_to_this_person&quot;]</span>
-<span class="c">#         to_messages = data_dict[name][&quot;to_messages&quot;]</span>
-<span class="c">#         fraction_from_poi = computeFraction( from_poi_to_this_person, to_messages )</span>
+        from_poi_to_this_person = data_dict[name][&quot;from_poi_to_this_person&quot;]
+        to_messages = data_dict[name][&quot;to_messages&quot;]
+        fraction_from_poi = computeFraction( from_poi_to_this_person, to_messages )
         
-<span class="c">#         data_dict[name][&quot;fraction_from_poi&quot;] = fraction_from_poi</span>
+        data_dict[name][&quot;fraction_from_poi&quot;] = fraction_from_poi
 
 
-<span class="c">#         from_this_person_to_poi = data_dict[name][&quot;from_this_person_to_poi&quot;]</span>
-<span class="c">#         from_messages = data_dict[name][&quot;from_messages&quot;]</span>
-<span class="c">#         fraction_to_poi = computeFraction( from_this_person_to_poi, from_messages )</span>
+        from_this_person_to_poi = data_dict[name][&quot;from_this_person_to_poi&quot;]
+        from_messages = data_dict[name][&quot;from_messages&quot;]
+        fraction_to_poi = computeFraction( from_this_person_to_poi, from_messages )
     
-<span class="c">#         data_dict[name][&quot;fraction_to_poi&quot;] = fraction_to_poi</span>
+        data_dict[name][&quot;fraction_to_poi&quot;] = fraction_to_poi
         
-<span class="c">#         salary = data_dict[name][&#39;salary&#39;]</span>
-<span class="c">#         total_payments = data_dict[name][&#39;total_payments&#39;] </span>
-<span class="c">#         salary_to_totalPayment_ratio = computeFraction(salary, total_payments)</span>
+        salary = data_dict[name][&#39;salary&#39;]
+        total_payments = data_dict[name][&#39;total_payments&#39;] 
+        salary_to_totalPayment_ratio = computeFraction(salary, total_payments)
         
-<span class="c">#         data_dict[name][&#39;salary_to_totalPayment_ratio&#39;] = salary_to_totalPayment_ratio</span>
+        data_dict[name][&#39;salary_to_totalPayment_ratio&#39;] = salary_to_totalPayment_ratio
         
-<span class="c">#         salary = data_dict[name][&#39;salary&#39;]</span>
-<span class="c">#         total_stock = data_dict[name][&#39;total_stock_value&#39;] </span>
-<span class="c">#         salary_to_stockValue_ratio = computeFraction(salary, total_stock)</span>
+        salary = data_dict[name][&#39;salary&#39;]
+        total_stock = data_dict[name][&#39;total_stock_value&#39;] 
+        salary_to_stockValue_ratio = computeFraction(salary, total_stock)
         
-<span class="c">#         data_dict[name][&#39;salary_to_stockValue_ratio&#39;] = salary_to_stockValue_ratio</span>
+        data_dict[name][&#39;salary_to_stockValue_ratio&#39;] = salary_to_stockValue_ratio
         
-<span class="c">#     return data_dict   </span>
+    return data_dict   
 
-<span class="c"># def removeOutliers(data_dictionary, list_data_points):</span>
-<span class="c">#     &quot;&quot;&quot;</span>
-<span class="c">#         remove the data points associated with any discovered outliers</span>
+def removeOutliers(data_dictionary, list_data_points):
+    &quot;&quot;&quot;
+        remove the data points associated with any discovered outliers
         
-<span class="c">#         Parameters:</span>
-<span class="c">#             data_dictionay = The Udacity provided data set data_dict or my_dataset.</span>
-<span class="c">#             data_point_name = The key name for the datapoint containing</span>
-<span class="c">#             outliers. (e.g. &#39;Total&#39;). </span>
-<span class="c">#         Output:</span>
-<span class="c">#             data_dictionary with the provided data point removed from the </span>
-<span class="c">#             dictionary.</span>
-<span class="c">#     &quot;&quot;&quot;</span>
-<span class="c">#     for elem in list_data_points:</span>
-<span class="c">#         try:</span>
-<span class="c">#             data_dictionary.pop(elem,0)</span>
-<span class="c">#             return data_dictionary</span>
-<span class="c">#         except ValueError:</span>
-<span class="c">#             print &quot;data_point not found in data_dict.&quot;</span>
-<span class="c">#             pass </span>
+        Parameters:
+            data_dictionay = The Udacity provided data set data_dict or my_dataset.
+            data_point_name = The key name for the datapoint containing
+            outliers. (e.g. &#39;Total&#39;). 
+        Output:
+            data_dictionary with the provided data point removed from the 
+            dictionary.
+    &quot;&quot;&quot;
+    for elem in list_data_points:
+        try:
+            data_dictionary.pop(elem,0)
+        except ValueError:
+            print &quot;data_point not found in data_dict.&quot;
+            pass
     
-<span class="c">#     return None</span>
+    return data_dictionary
 
-<span class="c"># def fixFinancialData(data_dictionary):</span>
-<span class="c">#     &quot;&quot;&quot;</span>
-<span class="c">#         Fix the financial data mistake for &#39;BHATNAGAR SANJAY&#39;</span>
-<span class="c">#         Parameters:</span>
-<span class="c">#             data_dictionary: Python dictionary containing the data set </span>
-<span class="c">#         Output:</span>
-<span class="c">#             Pythin dictionary containing the data set with &#39;BHATNAGAR SANJAY&#39;</span>
-<span class="c">#         financial data corrected</span>
-<span class="c">#     &quot;&quot;&quot;</span>
-<span class="c">#     data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;total_payments&#39;] = 137864</span>
-<span class="c">#     data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;restricted_stock&#39;] = 2604490</span>
-<span class="c">#     data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;restricted_stock_deferred&#39;] = -2604490</span>
-<span class="c">#     data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;expenses&#39;] = 137864</span>
-<span class="c">#     data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;other&#39;] = &#39;NaN&#39;</span>
-<span class="c">#     data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;exercised_stock_options&#39;] = 15456290</span>
-<span class="c">#     data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;total_stock_value&#39;] = 15456290</span>
+def fixFinancialData(data_dictionary):
+    &quot;&quot;&quot;
+        Fix the financial data mistake for &#39;BHATNAGAR SANJAY&#39;
+        Parameters:
+            data_dictionary: Python dictionary containing the data set 
+        Output:
+            Pythin dictionary containing the data set with &#39;BHATNAGAR SANJAY&#39;
+        financial data corrected
+    &quot;&quot;&quot;
+    data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;total_payments&#39;] = 137864
+    data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;restricted_stock&#39;] = 2604490
+    data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;restricted_stock_deferred&#39;] = -2604490
+    data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;expenses&#39;] = 137864
+    data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;other&#39;] = &#39;NaN&#39;
+    data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;exercised_stock_options&#39;] = 15456290
+    data_dictionary[&#39;BHATNAGAR SANJAY&#39;][&#39;total_stock_value&#39;] = 15456290
     
-<span class="c">#     return data_dictionary</span>
+    return data_dictionary
 </pre></div>
 
 </div>
@@ -5897,10 +5896,10 @@ process as closely as possible using the learned parameters and to elucidate on 
     <span class="c">## posted by nngeek</span>
     <span class="c">## ensure that &#39;poi&#39; is the first value in the feature list</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">tmp_features</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;poi&#39;</span><span class="p">)</span>
-      <span class="n">tmp_features</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;poi&#39;</span><span class="p">)</span>
+        <span class="n">tmp_features</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;poi&#39;</span><span class="p">)</span>
+        <span class="n">tmp_features</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;poi&#39;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-      <span class="k">pass</span>
+        <span class="k">pass</span>
 
     <span class="c">### Extract features and labels from dataset for local features importance analysis</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">featureFormat</span><span class="p">(</span><span class="n">my_dataset</span><span class="p">,</span> <span class="n">tmp_features</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -6634,7 +6633,7 @@ The variance explained by the top 22 components of the PCA:
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span class="c">## Final dataset overview   </span>
@@ -6651,6 +6650,7 @@ The variance explained by the top 22 components of the PCA:
 <span class="c">## Fix bad financial data</span>
 <span class="n">my_dataset</span> <span class="o">=</span> <span class="n">fixFinancialData</span><span class="p">(</span><span class="n">my_dataset</span><span class="p">)</span>
                
+<span class="c">#print sorted(my_dataset.keys())</span>
 <span class="n">data_set_overview</span><span class="p">(</span><span class="n">my_dataset</span><span class="p">)</span>
 </pre></div>
 
@@ -6664,7 +6664,7 @@ The variance explained by the top 22 components of the PCA:
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Number of data points in the data_dict: 145
+<pre>Number of data points in the data_dict: 144
 Number of Features: 25
 Number of Persons of Interest in data_dict: 18
 </pre>
@@ -6728,7 +6728,7 @@ All of the code implemented in this section was done in pursuit of finding the o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span class="c">#!/anaconda/bin/python</span>
@@ -6831,10 +6831,10 @@ All of the code implemented in this section was done in pursuit of finding the o
     <span class="c">## posted by nngeek</span>
     <span class="c">## ensure that &#39;poi&#39; is the first value in the feature list</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">features_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;poi&#39;</span><span class="p">)</span>
-      <span class="n">features_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;poi&#39;</span><span class="p">)</span>
+        <span class="n">features_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;poi&#39;</span><span class="p">)</span>
+        <span class="n">features_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;poi&#39;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-      <span class="k">pass</span>
+        <span class="k">pass</span>
 
     <span class="c">### Extract features and labels convert to numpy arrays</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">featureFormat</span><span class="p">(</span><span class="n">my_dataset</span><span class="p">,</span> <span class="n">features_list</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -6852,7 +6852,7 @@ All of the code implemented in this section was done in pursuit of finding the o
                                 <span class="n">test_size</span> <span class="o">=</span> <span class="o">.</span><span class="mi">3</span><span class="p">,</span>\
                                 <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
     
-    <span class="k">if</span> <span class="s">&quot;Best_Classifiers.pkl&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">):</span>    
+    <span class="k">if</span> <span class="s">&quot;Best_Classifiers_1.pkl&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">):</span>    
         <span class="c">## List of classifiers to explore and compare</span>
         <span class="n">classifiers</span> <span class="o">=</span> <span class="p">{</span>
                    <span class="s">&quot;GNB&quot;</span><span class="p">:</span> <span class="n">GaussianNB</span><span class="p">(),</span> 
@@ -6923,12 +6923,12 @@ All of the code implemented in this section was done in pursuit of finding the o
             <span class="n">best_classifiers</span><span class="p">[</span><span class="n">classifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">best_estimator_</span>
 
         <span class="c">## Save the best classifier pipeline objects to local directory using pickle</span>
-        <span class="n">PickleBestClassifers</span><span class="p">(</span><span class="n">best_classifiers</span><span class="p">,</span><span class="s">&quot;Best_Classifiers.pkl&quot;</span><span class="p">)</span>
+        <span class="n">PickleBestClassifers</span><span class="p">(</span><span class="n">best_classifiers</span><span class="p">,</span><span class="s">&quot;Best_Classifiers_1.pkl&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c">## After initial run of grid search, reference the pickled outcomes for the </span>
         <span class="c">## rest of the analysis. Actual searching process takes some time</span>
         <span class="c">## on my system setup, so I want to run it as few times as possible. </span>
-        <span class="n">savedResults</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;Best_Classifiers.pkl&quot;</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>  
+        <span class="n">savedResults</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;Best_Classifiers_1.pkl&quot;</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>  
         <span class="n">best_classifiers</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">savedResults</span><span class="p">)</span>  
     
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">best_classifiers</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
@@ -6964,7 +6964,102 @@ All of the code implemented in this section was done in pursuit of finding the o
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Parameters for GNB
+<pre>Fitting 30 folds for each of 20 candidates, totalling 600 fits
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>[Parallel(n_jobs=-1)]: Done 312 tasks      | elapsed:    3.4s
+[Parallel(n_jobs=-1)]: Done 600 out of 600 | elapsed:    6.1s finished
+//anaconda/lib/python2.7/site-packages/sklearn/metrics/classification.py:1074: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 in labels with no predicted samples.
+  &apos;precision&apos;, &apos;predicted&apos;, average, warn_for)
+//anaconda/lib/python2.7/site-packages/sklearn/metrics/classification.py:1074: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 in labels with no predicted samples.
+  &apos;precision&apos;, &apos;predicted&apos;, average, warn_for)
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Fitting 30 folds for each of 20 candidates, totalling 600 fits
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>[Parallel(n_jobs=-1)]: Done  46 tasks      | elapsed:    6.0s
+[Parallel(n_jobs=-1)]: Done 196 tasks      | elapsed:   22.8s
+[Parallel(n_jobs=-1)]: Done 600 out of 600 | elapsed:  1.1min finished
+//anaconda/lib/python2.7/site-packages/sklearn/metrics/classification.py:1074: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 in labels with no predicted samples.
+  &apos;precision&apos;, &apos;predicted&apos;, average, warn_for)
+//anaconda/lib/python2.7/site-packages/sklearn/metrics/classification.py:1074: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 in labels with no predicted samples.
+  &apos;precision&apos;, &apos;predicted&apos;, average, warn_for)
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Fitting 30 folds for each of 20 candidates, totalling 600 fits
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>[Parallel(n_jobs=-1)]: Done  46 tasks      | elapsed:   24.5s
+[Parallel(n_jobs=-1)]: Done 196 tasks      | elapsed:  2.3min
+[Parallel(n_jobs=-1)]: Done 446 tasks      | elapsed:  5.8min
+[Parallel(n_jobs=-1)]: Done 600 out of 600 | elapsed:  7.4min finished
+//anaconda/lib/python2.7/site-packages/sklearn/metrics/classification.py:1074: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 in labels with no predicted samples.
+  &apos;precision&apos;, &apos;predicted&apos;, average, warn_for)
+//anaconda/lib/python2.7/site-packages/sklearn/metrics/classification.py:1074: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 in labels with no predicted samples.
+  &apos;precision&apos;, &apos;predicted&apos;, average, warn_for)
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Fitting 30 folds for each of 20 candidates, totalling 600 fits
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>[Parallel(n_jobs=-1)]: Done 444 tasks      | elapsed:    8.1s
+[Parallel(n_jobs=-1)]: Done 600 out of 600 | elapsed:   11.5s finished
+//anaconda/lib/python2.7/site-packages/sklearn/metrics/classification.py:1074: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 in labels with no predicted samples.
+  &apos;precision&apos;, &apos;predicted&apos;, average, warn_for)
+//anaconda/lib/python2.7/site-packages/sklearn/metrics/classification.py:1074: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 in labels with no predicted samples.
+  &apos;precision&apos;, &apos;predicted&apos;, average, warn_for)
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Fitting 30 folds for each of 20 candidates, totalling 600 fits
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>[Parallel(n_jobs=-1)]: Done 204 tasks      | elapsed:    3.6s
+[Parallel(n_jobs=-1)]: Done 600 out of 600 | elapsed:    9.2s finished
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Best_Classifiers_1.pkl saved to local directory as a pickle file
+Parameters for GNB
 FEATURE SELECTION:
 [{&apos;n_jobs&apos;: 1, &apos;univ_select&apos;: SelectPercentile(percentile=21,
          score_func=&lt;function f_classif at 0x10ca48c08&gt;), &apos;pca__copy&apos;: True, &apos;transformer_list&apos;: [(&apos;pca&apos;, PCA(copy=True, n_components=7, whiten=False)), (&apos;univ_select&apos;, SelectPercentile(percentile=21,
@@ -7008,15 +7103,15 @@ avg / total       0.96      0.87      0.89        15
 Parameters for RDF
 FEATURE SELECTION:
 [{&apos;n_jobs&apos;: 1, &apos;univ_select&apos;: SelectPercentile(percentile=91,
-         score_func=&lt;function f_classif at 0x10ca48c08&gt;), &apos;pca__copy&apos;: True, &apos;transformer_list&apos;: [(&apos;pca&apos;, PCA(copy=True, n_components=2, whiten=False)), (&apos;univ_select&apos;, SelectPercentile(percentile=91,
-         score_func=&lt;function f_classif at 0x10ca48c08&gt;))], &apos;pca__n_components&apos;: 2, &apos;pca__whiten&apos;: False, &apos;pca&apos;: PCA(copy=True, n_components=2, whiten=False), &apos;transformer_weights&apos;: None, &apos;univ_select__score_func&apos;: &lt;function f_classif at 0x10ca48c08&gt;, &apos;univ_select__percentile&apos;: 91}]
+         score_func=&lt;function f_classif at 0x10ca48c08&gt;), &apos;pca__copy&apos;: True, &apos;transformer_list&apos;: [(&apos;pca&apos;, PCA(copy=True, n_components=15, whiten=False)), (&apos;univ_select&apos;, SelectPercentile(percentile=91,
+         score_func=&lt;function f_classif at 0x10ca48c08&gt;))], &apos;pca__n_components&apos;: 15, &apos;pca__whiten&apos;: False, &apos;pca&apos;: PCA(copy=True, n_components=15, whiten=False), &apos;transformer_weights&apos;: None, &apos;univ_select__score_func&apos;: &lt;function f_classif at 0x10ca48c08&gt;, &apos;univ_select__percentile&apos;: 91}]
 SCALER:
 [MinMaxScaler(copy=True, feature_range=(0, 1))]
 CLASSIFIER:
 [RandomForestClassifier(bootstrap=True, class_weight=&apos;balanced&apos;,
-            criterion=&apos;entropy&apos;, max_depth=21, max_features=&apos;auto&apos;,
+            criterion=&apos;entropy&apos;, max_depth=14, max_features=&apos;auto&apos;,
             max_leaf_nodes=None, min_samples_leaf=1, min_samples_split=2,
-            min_weight_fraction_leaf=0.0, n_estimators=161, n_jobs=1,
+            min_weight_fraction_leaf=0.0, n_estimators=242, n_jobs=1,
             oob_score=False, random_state=None, verbose=0,
             warm_start=False)]
 
@@ -7031,9 +7126,9 @@ avg / total       0.87      0.93      0.90        15
 
 Parameters for ADB
 FEATURE SELECTION:
-[{&apos;n_jobs&apos;: 1, &apos;univ_select&apos;: SelectPercentile(percentile=71,
-         score_func=&lt;function f_classif at 0x10ca48c08&gt;), &apos;pca__copy&apos;: True, &apos;transformer_list&apos;: [(&apos;pca&apos;, PCA(copy=True, n_components=12, whiten=False)), (&apos;univ_select&apos;, SelectPercentile(percentile=71,
-         score_func=&lt;function f_classif at 0x10ca48c08&gt;))], &apos;pca__n_components&apos;: 12, &apos;pca__whiten&apos;: False, &apos;pca&apos;: PCA(copy=True, n_components=12, whiten=False), &apos;transformer_weights&apos;: None, &apos;univ_select__score_func&apos;: &lt;function f_classif at 0x10ca48c08&gt;, &apos;univ_select__percentile&apos;: 71}]
+[{&apos;n_jobs&apos;: 1, &apos;univ_select&apos;: SelectPercentile(percentile=81,
+         score_func=&lt;function f_classif at 0x10ca48c08&gt;), &apos;pca__copy&apos;: True, &apos;transformer_list&apos;: [(&apos;pca&apos;, PCA(copy=True, n_components=12, whiten=False)), (&apos;univ_select&apos;, SelectPercentile(percentile=81,
+         score_func=&lt;function f_classif at 0x10ca48c08&gt;))], &apos;pca__n_components&apos;: 12, &apos;pca__whiten&apos;: False, &apos;pca&apos;: PCA(copy=True, n_components=12, whiten=False), &apos;transformer_weights&apos;: None, &apos;univ_select__score_func&apos;: &lt;function f_classif at 0x10ca48c08&gt;, &apos;univ_select__percentile&apos;: 81}]
 SCALER:
 [MinMaxScaler(copy=True, feature_range=(0, 1))]
 CLASSIFIER:
@@ -7043,7 +7138,7 @@ CLASSIFIER:
             min_samples_leaf=1, min_samples_split=2,
             min_weight_fraction_leaf=0.0, presort=False, random_state=None,
             splitter=&apos;best&apos;),
-          learning_rate=87.8748897177, n_estimators=360, random_state=None)]
+          learning_rate=1676.09595844, n_estimators=22, random_state=None)]
 
 
 ADB Score:
@@ -7056,14 +7151,14 @@ avg / total       0.86      0.80      0.83        15
 
 Parameters for SVC
 FEATURE SELECTION:
-[{&apos;n_jobs&apos;: 1, &apos;univ_select&apos;: SelectPercentile(percentile=91,
-         score_func=&lt;function f_classif at 0x10ca48c08&gt;), &apos;pca__copy&apos;: True, &apos;transformer_list&apos;: [(&apos;pca&apos;, PCA(copy=True, n_components=9, whiten=False)), (&apos;univ_select&apos;, SelectPercentile(percentile=91,
-         score_func=&lt;function f_classif at 0x10ca48c08&gt;))], &apos;pca__n_components&apos;: 9, &apos;pca__whiten&apos;: False, &apos;pca&apos;: PCA(copy=True, n_components=9, whiten=False), &apos;transformer_weights&apos;: None, &apos;univ_select__score_func&apos;: &lt;function f_classif at 0x10ca48c08&gt;, &apos;univ_select__percentile&apos;: 91}]
+[{&apos;n_jobs&apos;: 1, &apos;univ_select&apos;: SelectPercentile(percentile=71,
+         score_func=&lt;function f_classif at 0x10ca48c08&gt;), &apos;pca__copy&apos;: True, &apos;transformer_list&apos;: [(&apos;pca&apos;, PCA(copy=True, n_components=18, whiten=False)), (&apos;univ_select&apos;, SelectPercentile(percentile=71,
+         score_func=&lt;function f_classif at 0x10ca48c08&gt;))], &apos;pca__n_components&apos;: 18, &apos;pca__whiten&apos;: False, &apos;pca&apos;: PCA(copy=True, n_components=18, whiten=False), &apos;transformer_weights&apos;: None, &apos;univ_select__score_func&apos;: &lt;function f_classif at 0x10ca48c08&gt;, &apos;univ_select__percentile&apos;: 71}]
 SCALER:
 [MinMaxScaler(copy=True, feature_range=(0, 1))]
 CLASSIFIER:
-[SVC(C=230.677442765, cache_size=200, class_weight=&apos;balanced&apos;, coef0=0.0,
-  decision_function_shape=None, degree=3, gamma=0.100266991948,
+[SVC(C=46.5665479139, cache_size=200, class_weight=&apos;balanced&apos;, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma=0.281563723458,
   kernel=&apos;rbf&apos;, max_iter=-1, probability=False, random_state=None,
   shrinking=True, tol=0.001, verbose=False)]
 
@@ -7071,19 +7166,11 @@ CLASSIFIER:
 SVC Score:
              precision    recall  f1-score   support
 
-    non-poi       0.92      0.86      0.89        14
+    non-poi       0.93      0.93      0.93        14
         poi       0.00      0.00      0.00         1
 
-avg / total       0.86      0.80      0.83        15
+avg / total       0.87      0.87      0.87        15
 
-</pre>
-</div>
-</div>
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>//anaconda/lib/python2.7/site-packages/sklearn/metrics/classification.py:1074: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples.
-  &apos;precision&apos;, &apos;predicted&apos;, average, warn_for)
 </pre>
 </div>
 </div>
@@ -7094,7 +7181,7 @@ avg / total       0.86      0.80      0.83        15
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">best_classifiers</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>

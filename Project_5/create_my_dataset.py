@@ -127,12 +127,11 @@ def removeOutliers(data_dictionary, list_data_points):
     for elem in list_data_points:
         try:
             data_dictionary.pop(elem,0)
-            return data_dictionary
         except ValueError:
             print "data_point not found in data_dict."
-            pass 
+            pass
     
-    return None
+    return data_dictionary
 
 def fixFinancialData(data_dictionary):
     """
