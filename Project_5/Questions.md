@@ -19,6 +19,12 @@ Number of data points in the data_dict: 146
 Number of Features: 21
 Number of Persons of Interest in data_dict: 18
 ```   
+* Summary of my final dataset
+```
+Number of data points in the data_dict: 145
+Number of Features: 25
+Number of Persons of Interest in data_dict: 18
+```
 
 * Number and Percent of missing values ('NaN's') for each feature for the full data set,
 a subset containing just the poi's and a subset sans poi's:
