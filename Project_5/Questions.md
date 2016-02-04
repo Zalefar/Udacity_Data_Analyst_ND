@@ -13,9 +13,44 @@
 
 > <font color="red", size = 2>*What is a person of interest: Indicted, Settled without admitting guilt, Testified in exchange for immunity*</font>     
 
-*Were there any outliers in the data when you got it, and how did you handle those?*       
-* Yes there was at least one major outlier that perpetuated itself throughout the financial data. This outlier was a data point labeled "TOTAL" that upon examination of the financial data .pdf clearly represented the 'Totals' of the financial features. Clearly this data point is not a person and the information it contains already exists in each of the features by simply summing over all of their values. I chose to drop the data point itself. Further outliers may exist but may also be real data and indicative of possible fraudulent behavior. After reviewing some of the features with very large values the remaining values are not throwing any serious red flags as the 'TOTAL' data point did.
+* Summary of the data set found in the data_dict. This summary covers the original data set before prunning, additions and transformations.
+```
+Number of data points in the data_dict: 146
+Number of Features: 21
+Number of Persons of Interest in data_dict: 18
+```   
 
+* Number and Percent of missing values ('NaN's') for each feature for the full data set,
+a subset containing just the poi's and a subset of the dataset sans poi's:
+
+Features | Number_Full | Percent_Full | Number_POI | Percent_POI | Number_sansPOI | Percent_sansPOI
+--------|-------------|--------------|------------|-------------|----------------|----------------
+ bonus | 64 | 43.84 | 2 | 11.11 | 62 | 48.44
+deferral_payments | 107 | 73.29 | 13 | 72.22 | 94 | 73.44
+deferred_income | 97 | 66.44 | 7 | 38.89 | 90 | 70.31
+director_fees | 129 | 88.36 | 18 | 100.00 | 111 | 86.72   
+email_address | 35 | 23.97 | 0 | 0.00 | 35 | 27.34
+exercised_stock_options | 44 | 30.14 | 6 | 33.33 | 38 29.69
+expenses | 51 | 34.93 | 0 | 0.00 | 51 | 39.84
+from_messages | 60 | 41.10 | 4 | 22.22 | 56 | 43.75
+from_poi_to_this_person | 60 | 41.10 | 4 | 22.22 | 56 | 43.75
+from_this_person_to_poi | 60 | 41.10 | 4 | 22.22 | 56 | 43.75
+loan_advances | 142 | 97.26 | 17 | 94.44 | 125 | 97.66
+long_term_incentive | 80 | 54.79 | 6 | 33.33 | 74 | 57.81
+other | 53 | 36.30 | 0 | 0.00 | 53 | 41.41
+poi | 0 | 0.00 | 0 | 0.00 | 0 | 0.00
+restricted_stock | 36 | 24.66 | 1 | 5.56 | 35 | 27.34
+restricted_stock_deferred | 128 | 87.67 | 18 | 100.00 | 110 | 85.94
+salary | 51 | 34.93 | 1 | 5.56 | 50 | 39.06
+shared_receipt_with_poi | 60 | 41.10 | 4 | 22.22 | 56 | 43.75
+to_messages | 60 | 41.10 | 4 | 22.22 | 56 | 43.75
+total_payments | 21 | 14.38 | 0 | 0.00 | 21 | 16.41
+total_stock_value | 20 | 13.70 | 0 | 0.00 | 20 | 15.6
+
+> A quick glance at the data suggests that a.) there is just not that much data with only 146 data points and that b.) for a many of those data points large portions of their features are missing values. The key problem with this data set is the nominal number of data points, most machine learning algorithms performance is closely related to the quantity of data on which to train (also the quality however in our case our concern is mostly with the quantity and lack thereof). This means that the missing values are a big deal, Udacity's `featureFormat` function chooses to replace all the 'NaN' values with 0.0 and then remove any data points where all of the features are 0.0 (an additional option allows you to remove a data point that contains any 0.0 valued features--to aggressive in my opinion). There are problems that can arise by simply assuming that a 'NaN' can be replaced with a 0.0 without consequence. However other imputation methods are especially difficult in this case as we have so little other data from which to draw inferences in order to weigh imputation methods. So keeping in mind that choosing to replace the missing values with 0's is inserting information into our model and is not innocuous I will continue with the `featureFormat` function.
+
+*Were there any outliers in the data when you got it, and how did you handle those?*       
+* Yes there was at least one major outlier that perpetuated itself throughout the financial data. This outlier was a data point labeled "TOTAL" that upon examination of the financial data pdf clearly represented the 'Totals' of the financial features. Obviously this data point is not a person and the information it contains already exists in each of the features by simply summing over all of their values. I chose to drop the data point. 'THE TRAVEL AGENCY IN THE PARK' is not really a person and although may have been used to commit fraud it is a coporate entity and not an individual, I also dropped this data point. Reviewing some more of the extreme values in the features (values that are greater then or less then 1.5 times the I.Q.R. (inter-quartile-range) in either direction) I found at least one data point with incorrect information. According to the `enron61702insiderpay.pdf` document Bhatnagar Sanjay's financial data was all switched around, I fixed these errors and not finding any more red flags in the data moved on to creating my own features. 
 
 ***2. What features did you end up using in your poi identifier, and what selection process did you use to pick them? did you have to do any scaling? why or why not? Explain what feature you tried to make, and the rationale behind it. If you used an algorithm like a decision tree, please also give the feature importances of the features that you use, and if you used an automated feature selection function like selectkbest, please report the feature scores and reasons for your choice of parameter values.***   
 ***
@@ -272,5 +307,4 @@ avg / total       0.96      0.82      0.87        22
 ```    
 > NOTE: The following answer is based on my results from testing on my holdout test set. The results from the `tester.py` are different, however the essence of the results are the same. The test set uses more 'support' data points both non-poi and poi so the extremes in my results, the 100%, are mellowed out to much lower then 100%. That being said the result are proportionally very similar between my test data and the `tester.py` outcome.    
 
-* The classification report above is telling us a few important things about the models performance. The precision metric is indicating the percentage of instances that were flagged as non-pois and pois that were in truth non-pois and pois. The recall on the other hand is indicating the percentage of predicted non-poi's and poi's that really existed compared to what the model predicted existed. Given this information we can say that according to this classification report our model does an descent job of correctly identifying non-poi's  (perfect 100%) and poi's (20% not great) when it makes such a prediction. Our model however has more success when it comes to correctly identifying all the actual poi's in the test data (100%). We can see that it correctly identifies many non-pois but does slightly worse at finding all of the real non-poi's in the test-date. Our model does an excellent job of actually 'capturing' (predicting) most of the real poi's present in the test data. Personally I think this is a good thing, although this model is more likely to cause a greater workload for those tasked with looking into the individuals.   
-
+***Answer:*** The classification report above tells us a few important things about the model's performance. The precision metric is indicating the percentage of relevant (that is positive and correct) predictions made by the model over all the positive predictions made by the model (correct or incorrect). In other words how many of the positive predictions made by the model are actually relevant (positive and correct) when compared to ground truth reality. Recall on the other hand compares the number of relevant (positive and correct) predictions made by the model vs. the total number of relevant (positive and correct) values that actually exist in ground truth reality. In other words how many of the real relevant (positive and correct) ground truth values does our model identify compared to the total number that actually exists. The classification report above further breaks down the precision and recall for each of the possible labels non-poi and poi. Given this information we can say that according to this classification report our model does an excellent job of correctly identifying all non-poi's labels (perfect 100% of predictions are in reality correct) and less success with poi's (only 33% of are predicted positive labels are in reality actually real pois) when it makes such a prediction. Our model however has more success when it comes to correctly identifying all the actual poi (positive and correct) labels that exist in the test set data (100% perfect capture of all the possible positive poi labels that can be found in the test data set). We can see that it identifies most of the non-pois that can be found in reality in the test data set. Although this model is more likely to cause a greater workload for those tasked with looking into the individuals, as a result fo flagging more poi's than actually exist, the trade-off is in my mind worth it. I am more biased towards an algorithm that will correctly identify all of the poi's that do exist in reality even if it means flagging more innocent individuals for further scrutiny. 
