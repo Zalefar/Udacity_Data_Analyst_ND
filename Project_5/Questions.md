@@ -19,9 +19,9 @@ Number of data points in the data_dict: 146
 Number of Features: 21
 Number of Persons of Interest in data_dict: 18
 ```   
-* Summary of my final dataset
+* Summary of my final dataset: 126 non-pois, 18 pois
 ```
-Number of data points in the data_dict: 145
+Number of data points in the data_dict: 144
 Number of Features: 25
 Number of Persons of Interest in data_dict: 18
 ```
