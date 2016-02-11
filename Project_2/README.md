@@ -1,4 +1,8 @@
-# Project 2 -- NYC Subway Analysis          
+# Project 2 -- NYC Subway Analysis         
+****
+*Load, Wrangle, Analysis and predict NYC Subway turnstile data combined with Weather statistics. Utilizes Statistical measure of similarity between different datasets. Implement scikit learn supercised learning algorithms and data visulization to draw conclusions about weathers effect on subway traffic.*   
+
+
 The files contained in this directory are all related to the pursuit of analyzing New York Subway traffic data as it relates to weatherunderground provided weather statistics. The are several IPython notebooks included one which contains the entire project from its origins to the final conclusions and a second which contains only the final conclusions and analysis with answers to the Udacity provided questions.              
 
 `DA_Project_1.{ipynb,html}`:         
