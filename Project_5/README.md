@@ -1,5 +1,8 @@
 #Project 5 Identify Fraud from Enron Email   
-###Author: Zach Farmer
+###Author: Zach Farmer   
+***** 
+*Build an algorithm to identify Enron Employees who may have committed fraud based on the public Enron financial and email dataset.*   
+
 The files contained in this directory contain all of the resources and functions utilized in the course of this project. A list of files can be found below along with a brief description of their content and purpose.    
 
 `Project_5_Machine_Learning_POI_Classifier.ipynb`:
