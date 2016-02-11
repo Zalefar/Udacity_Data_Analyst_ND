@@ -38,20 +38,20 @@ Each project has its own folder and many are self contained, with the above inst
 Each folder contains a README which will describe the nature of the project and list out all of the files related to the project found within project sub-directories.     
 ***
 ##Credit and Reference Information      
-[Udacity Home Page](#https://www.udacity.com "https://www.udacity.com")   
+[Udacity Home Page](https://www.udacity.com "https://www.udacity.com")   
 **Primary Resources:**    
-[Udacity Data Analyst Nano Degree Program](#https://www.udacity.com/course/data-analyst-nanodegree--nd002 "https://www.udacity.com/course/data-analyst-nanodegree--nd002")   
-* [Statistics](#https://www.udacity.com/course/statistics--st095 "https://www.udacity.com/course/statistics--st095")     
-* [Intro to Data Science](#https://www.udacity.com/courses/ud359 "https://www.udacity.com/courses/ud359")      
-* [Data Wrangling with MongoDB](#https://www.udacity.com/courses/ud032 "https://www.udacity.com/courses/ud032")      
-* [Data Analysis with R](#https://www.udacity.com/courses/ud651 "https://www.udacity.com/courses/ud651")    
-* [Intro to Machine Learning](#https://www.udacity.com/courses/ud120 "https://www.udacity.com/courses/ud120")    
+[Udacity Data Analyst Nano Degree Program](https://www.udacity.com/course/data-analyst-nanodegree--nd002 "https://www.udacity.com/course/data-analyst-nanodegree--nd002")   
+* [Statistics](https://www.udacity.com/course/statistics--st095 "https://www.udacity.com/course/statistics--st095")     
+* [Intro to Data Science](https://www.udacity.com/courses/ud359 "https://www.udacity.com/courses/ud359")      
+* [Data Wrangling with MongoDB](https://www.udacity.com/courses/ud032 "https://www.udacity.com/courses/ud032")      
+* [Data Analysis with R](https://www.udacity.com/courses/ud651 "https://www.udacity.com/courses/ud651")    
+* [Intro to Machine Learning](https://www.udacity.com/courses/ud120 "https://www.udacity.com/courses/ud120")    
 * 
-* [A|B Testing](#https://www.udacity.com/courses/ud257 "https://www.udacity.com/courses/ud257")       
+* [A|B Testing](https://www.udacity.com/courses/ud257 "https://www.udacity.com/courses/ud257")       
 
 **Secondary Resources:**    
-* [Intro to Hadoop and MapReduce](#https://www.udacity.com/courses/ud617 "https://www.udacity.com/courses/ud617")    
-* [How to use Git and Github](#https://www.udacity.com/courses/ud775 "https://www.udacity.com/courses/ud775")           
+* [Intro to Hadoop and MapReduce](https://www.udacity.com/courses/ud617 "https://www.udacity.com/courses/ud617")    
+* [How to use Git and Github](https://www.udacity.com/courses/ud775 "https://www.udacity.com/courses/ud775")           
 
 *(work in progress... will continue to expand upon)    
 *(To do: add license info, add contact info)
