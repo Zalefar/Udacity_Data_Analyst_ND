@@ -1,7 +1,7 @@
 #Project 1 Udacity Data Analyst NanoDegree -- The Science of Decisions            
 The files in this directory contain the project itself in an ipyhton notebook (also an .html version) format along with the files used as resources during the course of the project. Assuming an anaconda python distro. installed you should be able to run the notebook on your personal machine.        
 
-`Project_1_The_Science_of_Decsions.{ipynb...html}`:              
+`Project_1_The_Science_of_Decsions.{ipynb,html}`:              
 	The project in its entirety. 
 
 `Statistics_Project1_Instructions.pdf`:         
