@@ -1,0 +1,4 @@
+# RStudio errata the doesn't need to be uploaded to a github
+*.Rproj   
+
+
