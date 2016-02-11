@@ -1,17 +1,14 @@
 #Project 1 Udacity Data Analyst NanoDegree -- The Science of Decisions            
-The files contain herein contain the project intself in an ipyhton notebook and .hmtl formate along with file used as resources in the contruction of this project.         
+The files in this directory contain the project itself in an ipyhton notebook (also an .html version) format along with the files used as resources during the course of the project. Assuming an anaconda python distro. installed you should be able to run the notebook on your personal machine.        
 
-`Project_1_The_Science_of_Decisions.html`:         
-	.hmtl version to the ipython notebook.
-
-`Project_1_The_Science_of_Decsions.ipynb`:         
-	The project in its entirety.
+`Project_1_The_Science_of_Decsions.{ipynb...html}`:              
+	The project in its entirety. 
 
 `Statistics_Project1_Instructions.pdf`:         
 	The goals and required outcome of the project.
 
 `Understanding the Dependent t Test.pdf`:       
-	Resource referred to when implementing and explaining the t Test. 
+	Resource referred to when implementing and explaining the t-test. 
 
 `stroopdata.csv`:          
 	The data upon which the project was constructed.    
