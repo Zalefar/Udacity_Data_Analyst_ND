@@ -29,7 +29,7 @@ Each project has its own folder and many are self contained, with the above inst
 
 `Project_1`: Test a Perceptual Phenomenon -- Stroop Effect         
 `Project_2`: Investigate A Dataset -- NYC Subway Turnstile date with Weather statistics         
-`Project_3`: Wrangle Open Street Map data        
+`Project_3`: Wrangle Open Street Map Data        
 `Project_4`: Explore and Summarize Data -- Prosper Loans      
 `Project_5`: Identify Fraud From Enron Email -- Machine Learning                
 \_\_\_*Project_6*\_\_\_      
