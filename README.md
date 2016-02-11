@@ -20,5 +20,16 @@ Installation instructions for Anaconda's python distribution can be found here: 
 
 For any R code found in html or markdown files you might wish to implement it on your own machine I would suggest RStudio ([http://www.rstudio.com/products/rstudio/download/](http://www.rstudio.com/products/rstudio/download/)) 
 
+##Format      
+Each Project has its own folder and many are self contained, with the above installations you should be able to run many of the ipython notebooks an your own machine, installing specialized packages where necessary. Some of the notebooks and specifically the R-markdown file may not work as they utilize my file system hierarchy for some of their loading functionality and would have to be changed to that of your local system in order to work. 
+
+`Project_1`: Test a Perceptual Phenomenon -- Stroop Effect 
+`Project_2`: Investigate A Dataset -- NYC Subway Turnstile date with Weather statistics         
+`Project_3`: Wrangle Open Street Map data        
+`Project_4`: Explore and Summarize Data -- Prosper Loans      
+`Project_5`: Identify Fraud From Enron Email -- Machine Learning    
+
+`Project_7`: Design and A|B Test       
+
 *(work in progress... will continue to expand upon)    
 *(To do: add a 'getting started', add 'credit and reference information' links Udacity courses, add license info, add contact info)
