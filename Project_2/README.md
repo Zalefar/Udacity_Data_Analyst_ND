@@ -8,7 +8,13 @@ The files contained in this directory are all related to the pursuit of analyzin
 	Presentable version of the project containing summaries and answers to the Udacity provided questions.   
 
 `Subway_avg_results.txt`:           
-	Created as a result of using linux bash to act as proxy for a mapreduce job run on an HDFS (Hadoop Distributed File System). This text files contains the outcome of the mapper and reducer .py scripts.             
+	Created as a result of using linux bash to act as proxy for a mapreduce job run on an HDFS (Hadoop Distributed File System). This text files contains the outcome of the mapper and reducer .py scripts.  
+
+`Subway_data_results.txt`:      
+	Created as a result of runnning the Subway data mapper and reducer scripts.       
+	
+`Subway_max_results.txt`:          
+	Created as a result of running the Subway data max mapper and reducer scripts.      
 	  
 `Subway_data_avg_mapper.py`:       
 	Python script containing a mappers for a Map reduce job. For the ultimate purpose of finding averages, data returned in this script designed to be passed on the a reducer .py script.         
