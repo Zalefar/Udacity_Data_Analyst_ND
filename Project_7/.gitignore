@@ -1,0 +1,4 @@
+# Ipython notebook errata  
+*.ipynb_checkpoints  
+
+
