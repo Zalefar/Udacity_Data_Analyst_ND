@@ -1,4 +1,4 @@
-#Project 1 Udacity Data Analyst NanoDegree -- The Science of Decisions  
+#Project 1 -- The Science of Decisions  
 ****
 *Use descriptive statistics and a statistical test to analyze the Stroop effect, a classic result of experimental psychology. Provides good intuition for the data and uses statistical inference to draw a conclusion based on the results.*
 
