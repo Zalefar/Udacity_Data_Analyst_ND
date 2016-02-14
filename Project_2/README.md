@@ -8,7 +8,7 @@ The files contained in this directory are related to the pursuit of analyzing Ne
 	Ipython notebook and .html version of the project in its entirety. The notebook utilizes or creates the other files included in this directory and if you have an installation of anaconda installed you should be able to run the Ipython notebook on your personal machine. Project includes all my steps and notes, it was meant to document thought process, workflow and methodological approach. Not meant to be a presentation or report in this format.
 
 `Short-Q&A_Project_1.{ipynb,html}`:               
-	Presentable version of the project containing summaries and answers to the Udacity provided questions.   
+	Presentable version of the project containing summaries and answers to the Udacity provided questions. CSS styling not available when viewing inside github file view.
 
 `Subway_data_avg_mapper.py`:       
 	Python script containing a mapper for a MapReduce job. For the ultimate purpose of finding averages, data returned in this script designed to be passed on the a reducer .py script.         
