@@ -1,12 +1,11 @@
 # Project 2 -- NYC Subway Analysis         
 ****
-*Load, Wrangle, Analysis and predict NYC Subway turnstile data combined with Weather statistics. Utilizes Statistical measure of similarity between different datasets. Implement scikit learn supercised learning algorithms and data visulization to draw conclusions about weathers effect on subway traffic.*   
+*Loaded, wrangled, analyzed and predicted NYC subway turnstile traffic. Utilizes statistical measures of similarity and data visualization to explore the data. Implements scikit-learn supervised learning algorithms to draw conclusions about weathers effect on subway traffic.*   
 
-
-The files contained in this directory are all related to the pursuit of analyzing New York Subway traffic data as it relates to weatherunderground provided weather statistics. The are several IPython notebooks included one which contains the entire project from its origins to the final conclusions and a second which contains only the final conclusions and analysis with answers to the Udacity provided questions.              
+The files contained in this directory are related to the pursuit of analyzing New York Subway traffic data in connection with weatherunderground provided weather statistics. The are several IPython notebooks included, one which contains the entire project from its origins to the final conclusions and a second which contains only the final conclusions and analysis with answers to the Udacity provided questions. The notebook containing the project from beginning to end contains the entire work process and is not suitable from presentation of the analysis and results, it exists merely as documentation of thought process and approach.             
 
 `DA_Project_1.{ipynb,html}`:         
-	Ipython notebook and .html version of the project in its entirety. The notebook utilizes or creates the other files included in this directory and if you have an installation of anaconda installed you should be able to run the ipy. notebook on your personal machine. Project includes all my steps and notes, it was meant to document thought process, workflow and methodological approach. Not meant to be a presentation or report in this format.
+	Ipython notebook and .html version of the project in its entirety. The notebook utilizes or creates the other files included in this directory and if you have an installation of anaconda installed you should be able to run the Ipython notebook on your personal machine. Project includes all my steps and notes, it was meant to document thought process, workflow and methodological approach. Not meant to be a presentation or report in this format.
 
 `Short-Q&A_Project_1.{ipynb,html}`:               
 	Presentable version of the project containing summaries and answers to the Udacity provided questions.   
