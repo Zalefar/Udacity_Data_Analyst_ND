@@ -2,13 +2,13 @@
 ****
 *Loaded, wrangled, analyzed and predicted NYC subway turnstile traffic. Utilizes statistical measures of similarity and data visualization to explore the data. Implements scikit-learn supervised learning algorithms to draw conclusions about weathers effect on subway traffic.*   
 
-The files contained in this directory are related to the pursuit of analyzing New York Subway traffic data in connection with weatherunderground provided weather statistics. The are several IPython notebooks included, one which contains the entire project from its origins to the final conclusions and a second which contains only the final conclusions and analysis with answers to the Udacity provided questions. The notebook containing the project from beginning to end contains the entire work process and is not suitable from presentation of the analysis and results, it exists merely as documentation of thought process and approach.             
+The files contained in this directory are related to the pursuit of analyzing New York Subway traffic data in connection with weatherunderground provided weather statistics. The are several IPython notebooks included, one which contains the entire project from its origins to the final conclusions and a second which contains only the final conclusions and analysis with answers to the Udacity provided questions. The notebook containing the project from beginning to end contains all of the Problem set found in the course related to the NYC Subway data.             
 
 `DA_Project_1.{ipynb,html}`:         
-	Ipython notebook and .html version of the project in its entirety. The notebook utilizes or creates the other files included in this directory and if you have an installation of anaconda installed you should be able to run the Ipython notebook on your personal machine. Project includes all my steps and notes, it was meant to document thought process, workflow and methodological approach. Not meant to be a presentation or report in this format.
+	Ipython notebook and .html version of the project in its entirety. The notebook utilizes or creates the other files included in this directory and if you have an installation of anaconda installed you should be able to run the Ipython notebook on your personal machine. Project includes all my steps and notes, the notebook was created in the course of completing problem sets throughout Udacity's Intro to Data Science class. As a result the notebook's function is to provide the foundation upon which the Short Q&A notebook was developed from. You can find the code behind the numbers and anlysis in the Short Q&A here.  
 
 `Short-Q&A_Project_1.{ipynb,html}`:               
-	Presentable version of the project containing summaries and answers to the Udacity provided questions. CSS styling not available when viewing inside github file view.
+	Presentable version of the project containing summaries and answers to the Udacity provided questions. CSS styling not available when viewing inside github file view. The analysis for these questions and answer was performed in the DA_Project_1 notebook.
 
 `Subway_data_avg_mapper.py`:       
 	Python script containing a mapper for a MapReduce job. For the ultimate purpose of finding averages, data returned in this script designed to be passed on the a reducer .py script.         
