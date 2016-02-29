@@ -12,10 +12,10 @@ Image of the Kirkland WA zip code.
 `Openstreetmap_project_area.png`:   
 Image of the OpenStreetMap region used in this project.   
 
-`Project_2_Clean.{ipynb,html}`:      
+`Project_3_Clean.{ipynb,html}`:      
 The final presentable project containing the final analysis, summaries and answer to Udacity provided questions.       
 
-`Project_2_Complete.{ipynb,html}`:    
+`Project_3_Complete.{ipynb,html}`:    
 The project in its entirety, from the beginning to end. Inlcuded to document workflow and thought processes.     
 
 `sample.osm`:         
