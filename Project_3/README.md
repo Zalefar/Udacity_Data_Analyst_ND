@@ -1,6 +1,6 @@
 # Project 3 -- Wrangle OpenStreetMap Data      
 ****
-*Uses data munging techniques to analyse the Seattle Area Eastide. Assesses the quality of the data for validity, accuracy, completeness, consistency and uniformity. Use and subsequently clean OpenStreetMap data to accomplish in the pursuit of this task.*    
+*Used data munging techniques to analyze the east-side of the greater Seattle area. Assessed the quality of the data for validity, accuracy, completeness, consistency and uniformity. Used, cleaned and uploaded to MongoDB OpenStreetMap data in the pursuit of this project.*    
 
 > The OSM data files used in this project are not included in the repository owing to their size exceeding 100MBs. I have included a 'sample.osm' file which reflects the osm file format and content. If you wish to implement the code in the ipython noteboks you will have to follow the provided links in the ipython notebook and download the dataset into the same directory as the notebooks. 
 
