@@ -4,4 +4,5 @@
 #OS errata
 *.DS_Store   
 
-
+#vim backups 
+*.md~
