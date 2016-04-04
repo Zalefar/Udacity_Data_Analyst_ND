@@ -1,0 +1,184 @@
+
+/* { 
+    border: 1px solid red !important;
+} */
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    font-family: 'Lato', sans-serif; 
+}
+
+/* @media only screen and (max-width: 200px) {
+    p {
+        background-color: blue;
+        display: none;
+    }   
+} */  
+
+body {
+    background-image: url("../../images/data_science_edited.jpg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: 'Lato', sans-serif; 
+}
+
+.grid {
+    margin: 0 auto;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.pagelimit {
+    max-width: 1000px;
+}
+
+/*.row {
+    width: 100%;
+    display: -webkit-flex;
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.row.header {
+    max-width: 1000px;
+    width: 100%;
+    display: -webkit-flex;
+    display: flex;
+    flex-wrap: wrap;
+    padding-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.row.body {
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 25px;
+}*/
+
+.logoGraphic {
+    border-radius: 20px;
+}
+
+.mainGraphic {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 25px;
+    border-radius: 8px;
+    border-top-style: solid;
+    border-top-color: #737373;
+    border-top-width: 5px;
+}
+
+/*.projectGraphic {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}*/
+
+.title {
+    color: #262626;
+    font-size: 3em;
+    font-weight: bold;
+    letter-spacing: 3px; 
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: #595959;
+    font-size: 1.5em;
+    font-style: italic;
+    font-weight: bold;
+    letter-spacing: 3px; 
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.projectTitle {
+    color: #595959;
+    font-size: 1.5em;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-top: 15px;
+    margin-bottom: 2px;
+    border-style: groove;
+    border-radius: 10px;
+    border-width: 5px;
+    padding: 5px;
+    display: inline;
+}  
+
+h3 {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 1px;
+    margin-bottom: auto;
+    font-weight: bold; 
+}
+
+p { 
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 1px;
+    margin-bottom: auto;
+} 
+
+/*.col-1 {
+    width: 8.33%;
+}
+
+.col-2 {
+    width: 16.33%;
+}
+
+.col-3 {
+    width: 25%;
+}
+
+.col-4 {
+    width: 33.33%;
+    /*border-style: groove;
+    border-width: 2px;
+    border-color: #cccccc;
+    border-radius: 20px;*/
+}
+
+.col-5 {
+    width: 41.66%;
+}
+
+.col-6 {
+    width: 50%;
+}
+
+.col-7 {
+    width: 58.33%;
+}
+
+.col-8 {
+    width: 66.66%;
+}
+
+.col-9 {
+    width: 75%;
+}
+
+.col-10 {
+    width: 83.33%;
+}
+
+.col-11 {
+    width: 91.66%;
+}
+
+.col-12 {
+    width: 100%;
+}*/

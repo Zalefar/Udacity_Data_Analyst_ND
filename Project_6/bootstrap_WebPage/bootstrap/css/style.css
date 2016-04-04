@@ -1,0 +1,88 @@
+
+body {
+    background-image: url("../../images/data_science_edited.jpg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: 'Lato', sans-serif; 
+}
+
+.topbuffer{
+    margin-top: 30px;
+}
+
+
+.logoGraphic {
+    margin-top: 10px;
+    border-radius: 20px;
+}
+
+#myImg:hover{border: 1px solid blue !important;}
+
+/*.mainGraphic {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 25px;
+    border-radius: 8px;
+    border-top-style: solid;
+    border-top-color: #737373;
+    border-top-width: 5px;
+}*/
+
+.title {
+    color: #262626;
+    font-size: 3em;
+    font-weight: 300;
+    letter-spacing: 3px; 
+    margin-top: 5px;
+    margin-bottom: 5px;
+    
+}
+
+.subtitle {
+    color: #595959;
+    font-size: 1.5em;
+    font-style: italic;
+    font-weight: bold;
+    letter-spacing: 3px; 
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.projectTitle {
+    color: #595959;
+    font-size: 1.5em;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    border-style: groove;
+    border-radius: 10px;
+    border-width: 5px;
+    padding: 5px;
+    display: inline;
+}  
+
+hr {
+    boder: none;
+    border-radius: 25px;
+    height: 5px;
+    background-color: #a6a6a6;
+}
+
+h3 {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    margin-bottom: auto;
+    font-weight: 400; 
+    font-size: 1.4em;
+}
+
+p { 
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5px;
+    margin-bottom: auto;
+    font-size: 1.1em;
+} 
