@@ -1,0 +1,7 @@
+#Ipython Related errata
+.ipynb_checkpoints
+#python related errata
+*.pyc
+
+#vim backups 
+*~

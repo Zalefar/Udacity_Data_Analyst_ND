@@ -1,0 +1,34 @@
+The following are a list of resources and references that I utilized in the course of the report. Some of these resources are were extensively utilized such as Scikit-Learn modules and I will not be referencing every single page that I utilized, rather I list the main web page and give a general description of how I engaged the resources. 
+
+Scikit-Learn: Machine Learning in Python: http://scikit-learn.org/stable/ 
+    Heavily used for detailed examples and explanations of most of the machine learning pipeline.
+From selecting features, scaling, classifiers, pipelines and hyper-parameter optimization I found Sklearn's website invaluable. 
+
+pandas 0.17.1 documentation: http://pandas.pydata.org/pandas-docs/stable/
+- http://pandas.pydata.org/pandas-docs/stable/visualization.html
+    Used as references for the pandas dataframe utilized in my code for data set review and 
+plotting.  
+
+Oliver Grisel's parallel_ml_tutorial: https://github.com/ogrisel/parallel_ml_tutorial/
+Advanced Machine Learning Tutorial with scikit-learn: https://www.youtube.com/watch?v=iFkRt3BCctg
+    These two resources were instrumental in helping me construct my parallelizable code for 
+distribution on an aws ec2 cluster.   
+
+Starcluster : http://star.mit.edu/cluster/docs/latest/index.html
+    MIT's Starcluster was very helpful in my implementing a naive grid-search in on an AWS EC2 
+cluster. While Ultimately I did not include the results of this exercise in my final results, the process of parallelizing my grid search and distributing over large cluster was a valuable 
+learning opportunity.   
+
+Stack Overflow: 
+- http://stackoverflow.com/questions/4211209/remove-all-the-elements-that-occur-in-one-list-from-another
+- http://stackoverflow.com/questions/3173154/move-an-item-inside-a-list
+- http://stackoverflow.com/questions/14507591/python-dictionary-comprehension 
+- http://stackoverflow.com/questions/29930340/want-to-plot-pandas-dataframe-as-multiple-histograms-with-log10-scale-x-axis 
+    As usual Stack Overflow was invaluable for solving all those little problems that come up 
+in the implementation of your ideas to actual code. Most of the code referenced in these Stackoverflow pages are related to vagaries of the python language, for example what approach is the most pythonic method to solving a particular goal.   
+
+For those interested in reading up on the methodology and validity of a randomized grid search you
+can find a seminal paper on the subject of "Random Search for Hyper-Parameter Optimization"
+by James Bergstra and Yoshua Bengio here:
+- http://www.jmlr.org/papers/volume13/bergstra12a/bergstra12a.pdf   
+    

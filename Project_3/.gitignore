@@ -1,0 +1,8 @@
+#Ipython errata, doesn't need to be uploaded to github
+*.ipynb_checkpoints  
+
+#OS errata
+*.DS_Store   
+
+#vim backups 
+*.md~

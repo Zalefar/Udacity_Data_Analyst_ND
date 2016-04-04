@@ -1,0 +1,6 @@
+# Ipython notebook errata
+*.ipynb_checkpoints  
+
+# OS errata
+*.DS_Store
+

@@ -1,0 +1,3 @@
+# Ipython notebook errata that doesn't need to be uploaded to gihub
+*.ipynb_checkpoints  
+
